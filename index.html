@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>408 计算机组成原理可视化课堂 · 从门电路到整机</title>
-<meta name="description" content="为 408 考研准备的计算机组成原理学习站：7 章知识体系、8 个交互实验室、70 道分级练习、备考方法论。">
-<link rel="stylesheet" href="assets/style.css?v=2">
+<meta name="description" content="为 408 考研准备的计算机组成原理学习站：7 章知识体系、9 个交互实验室、31 张教学图解、70 道分级练习、9 道大题演算与备考方法论。">
+<link rel="stylesheet" href="assets/style.css?v=3">
 </head>
 <body>
 <nav class="topbar"><div class="topbar-inner">
   <a class="logo" href="index.html"><span class="dot"></span>408 计组可视化课堂</a>
   <div class="nav-links">
-    <a href="index.html">总览</a><a href="ch01.html">系统概述</a><a href="ch02.html">数据表示</a><a href="ch03.html">存储系统</a><a href="ch04.html">指令系统</a><a href="ch05.html">CPU</a><a href="ch06.html">总线</a><a href="ch07.html">I/O</a><a href="practice.html">练习场</a><a href="method.html">备考方法论</a><a href="resources.html">资源导航</a>
+    <a href="index.html">总览</a><a href="ch01.html">系统概述</a><a href="ch02.html">数据表示</a><a href="ch03.html">存储系统</a><a href="ch04.html">指令系统</a><a href="ch05.html">CPU</a><a href="ch06.html">总线</a><a href="ch07.html">I/O</a><a href="practice.html">练习场</a><a href="bigquestions.html">大题演算</a><a href="method.html">备考方法论</a><a href="resources.html">资源导航</a>
   </div>
   <button class="theme-btn" title="切换明暗主题">🌙</button>
 </div></nav>
@@ -27,6 +27,7 @@
       <div class="stat"><b>9</b><span>个交互实验室</span></div>
       <div class="stat"><b>31</b><span>张教学图解</span></div>
       <div class="stat"><b>70</b><span>道分级练习</span></div>
+      <div class="stat"><b>9</b><span>道大题演算</span></div>
       <div class="stat"><b>1</b><span>套备考方法论</span></div>
     </div>
   </div>
@@ -62,6 +63,11 @@
     <b>② 再看人话：</b>黄色“生活类比”框，把部件/流程换成日常场景；看不懂公式时先回到这里。<br>
     <b>③ 再玩实验室：</b>改参数看结果，图会跟着变；比盯着公式推更直观。<br>
     <b>④ 最后做题：</b>先做基础题，错题自动进错题本；一轮看不懂的“进阶深挖”可以留到二轮。
+  </div>
+
+  <div class="callout exam">
+    <div class="co-title">🧮 大题不会写过程？去「大题演算」页</div>
+    Cache 地址划分、主存芯片扩展、数据通路微操作、流水线时空图四类综合题，每类都给<b>逐步演算</b>（点一下显示一步）和<b>采分点表</b>。先自己在纸上写，再逐步对答案，比只看解析有用得多。<a href="bigquestions.html">现在去 →</a>
   </div>
 
   <h2 class="sec">知识体系总览 · 计算机组成原理篇</h2>
@@ -130,7 +136,7 @@
     <div class="step"><b>第 1 步 · 按 01 → 07 过章：</b>每章先看“这一章在整机里的位置” → 读生活类比 → 读分节详解 → 动手玩实验室 → 做章内练习 → 完成打卡。</div>
     <div class="step"><b>第 2 步 · 用练习场查漏：</b>去<a href="practice.html">练习场</a>按章节/难度筛选，先做基础，再做提高和真题改编；错题自动进错题本，用“只看错题”重做三遍。</div>
     <div class="step"><b>第 3 步 · 配合教材：</b>以唐朔飞/袁春风教材或王道单科书为主线，本站当作“看不懂时的可视化字典”。看到公式就回到对应实验室改参数验证。</div>
-    <div class="step"><b>第 4 步 · 大题动手写：</b>Cache 地址划分、主存扩展、数据通路微操作、流水线时空图，必须<b>在纸上完整写一遍</b>，不能只看懂。每道大题按“公式 + 代入 + 结果 + 单位”四行写。</div>
+    <div class="step"><b>第 4 步 · 大题动手写：</b>Cache 地址划分、主存扩展、数据通路微操作、流水线时空图，必须<b>在纸上完整写一遍</b>，不能只看懂。每道大题按“公式 + 代入 + 结果 + 单位”四行写；不会写就去<a href="bigquestions.html">大题演算页</a>逐步对照。</div>
   </div>
 
   <h2 class="sec">🔍 四组最容易混的概念（先记这张表）</h2>
@@ -170,10 +176,11 @@
 </div>
 
 <footer>
-  408 计算机组成原理可视化课堂 · 7 章知识体系 + 8 个实验室 + 70 道分级练习<br>
+  408 计算机组成原理可视化课堂 · 7 章知识体系 + 9 个实验室 + 31 张图解 + 70 道分级练习 + 9 道大题演算<br>
   <div class="pagers">
     <a href="ch01.html">开始学习 第 1 章 →</a>
     <a href="practice.html">去练习场 →</a>
+    <a href="bigquestions.html">大题演算 →</a>
     <a href="method.html">先看备考方法论 →</a>
   </div>
 </footer>

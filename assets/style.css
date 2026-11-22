@@ -469,6 +469,73 @@ footer .pagers { display: flex; justify-content: center; gap: 14px; margin-top: 
 footer .pagers a { border: 1px solid var(--line); border-radius: 10px; padding: 8px 18px; background: var(--card); color: var(--ink-2); font-size: 14px; }
 footer .pagers a:hover { border-color: var(--brand); color: var(--brand); text-decoration: none; }
 
+/* ── 大题演算页 ── */
+.bq {
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+  padding: 16px 18px; margin: 18px 0 8px; box-shadow: var(--shadow);
+}
+.bq-q { font-size: 14.5px; color: var(--ink-2); line-height: 1.85; }
+.bq-q b { color: var(--brand); }
+[data-steps] { margin: 8px 0 6px; }
+.bq-bar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 10px 12px; background: var(--card-2); border: 1px solid var(--line); border-radius: 12px;
+}
+.bq-progress {
+  font-family: var(--mono); font-size: 12.5px; color: var(--ink-3);
+  margin-right: auto; letter-spacing: .5px;
+}
+.bq-btn {
+  border: 1px solid var(--brand); background: var(--brand-soft); color: var(--brand);
+  border-radius: 8px; padding: 6px 13px; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: transform .1s, opacity .15s;
+}
+.bq-btn:hover:not(:disabled) { transform: translateY(-1px); }
+.bq-btn.ghost { border-color: var(--line); background: var(--card); color: var(--ink-2); }
+.bq-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+.bq-hint { margin-top: 10px; font-size: 13px; color: var(--ink-3); }
+.bq-list { list-style: none; margin: 4px 0 0; padding: 0; }
+.bq-step {
+  display: none; gap: 10px; padding: 12px 2px;
+  border-bottom: 1px dashed var(--line);
+}
+.bq-step.on { display: flex; animation: bqIn .22s ease; }
+.bq-step:last-child { border-bottom: none; }
+@keyframes bqIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+.bq-num {
+  flex: 0 0 26px; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--brand-soft); color: var(--brand);
+  font-weight: 800; font-size: 13px; font-family: var(--mono);
+  display: flex; align-items: center; justify-content: center; margin-top: 1px;
+}
+.bq-step-body { flex: 1; min-width: 0; }
+.bq-step-title { font-weight: 800; font-size: 14px; color: var(--ink); }
+.bq-formula {
+  font-family: var(--mono); font-size: 13px; line-height: 1.8;
+  background: var(--code-bg); border-left: 3px solid var(--brand);
+  border-radius: 6px; padding: 7px 11px; margin: 6px 0;
+  color: var(--ink); overflow-x: auto; word-break: break-word;
+}
+.bq-explain { font-size: 13.2px; color: var(--ink-2); }
+.bq-answer {
+  margin-top: 12px; padding: 12px 15px; border-radius: 12px;
+  background: var(--green-soft); border: 1px solid var(--green);
+  font-size: 14px; line-height: 1.8; color: var(--ink-2);
+}
+.bq-answer b { color: var(--green); }
+.bq-score th:first-child, .bq-score td:first-child { width: 42%; }
+.bq-gantt { overflow-x: auto; background: var(--card-2); border-radius: 12px; padding: 12px; margin-top: 12px; }
+.bq-gantt svg { display: block; height: auto; }
+@media (max-width: 620px) {
+  .bq { padding: 14px; }
+  .bq-progress { width: 100%; margin-bottom: 2px; }
+  .bq-step { padding: 10px 0; }
+  .bq-score th:first-child, .bq-score td:first-child { width: 38%; }
+}
+
 @media (max-width: 720px) {
   .hero { padding: 26px 20px; }
   .hero h1 { font-size: 25px; }

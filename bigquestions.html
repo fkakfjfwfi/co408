@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大题演算 · 408 计算机组成原理可视化课堂</title>
+<meta name="description" content="408 计组四类综合题逐步演算：Cache 地址划分、主存芯片扩展、数据通路微操作、流水线时空图，每题给公式、代入、结果、采分点与易错点。">
+<link rel="stylesheet" href="assets/style.css?v=3">
+</head>
+<body>
+<nav class="topbar"><div class="topbar-inner">
+  <a class="logo" href="index.html"><span class="dot"></span>408 计组可视化课堂</a>
+  <div class="nav-links">
+    <a href="index.html">总览</a><a href="ch01.html">系统概述</a><a href="ch02.html">数据表示</a><a href="ch03.html">存储系统</a><a href="ch04.html">指令系统</a><a href="ch05.html">CPU</a><a href="ch06.html">总线</a><a href="ch07.html">I/O</a><a href="practice.html">练习场</a><a href="bigquestions.html">大题演算</a><a href="method.html">备考方法论</a><a href="resources.html">资源导航</a>
+  </div>
+  <button class="theme-btn" title="切换明暗主题">🌙</button>
+</div></nav>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="kicker">BIG QUESTIONS · 综合题演算</span>
+    <h1>四类大题，<em>一步一步</em>算给你看</h1>
+    <p>408 计组的综合题，难点不在“懂不懂”，而在“写不写得完整”。这一页把 <b>Cache 地址划分、主存芯片扩展、数据通路微操作、流水线时空图</b> 四类必考大题拆成可点击的步骤：每一步给出公式、代入和易错点，最后附<b>采分点表</b>。先自己在纸上写，再点“下一步”对一步。</p>
+    <p class="tagline">9 道例题 · 逐步演算 · 采分点拆解 · 2 个参数计算器</p>
+    <div class="stats">
+      <div class="stat"><b>4</b><span>类必考大题</span></div>
+      <div class="stat"><b>9</b><span>道演算例题</span></div>
+      <div class="stat"><b>4</b><span>行书写模板</span></div>
+      <div class="stat"><b>2</b><span>个计算器</span></div>
+    </div>
+  </div>
+
+  <div class="toc"><span class="toc-label">本页导航</span><a href="#rule">通用模板</a><a href="#cache">Cache 地址划分</a><a href="#chip">主存扩展</a><a href="#datapath">数据通路</a><a href="#pipeline">流水线</a><a href="#check">考前检查</a></div>
+
+  <div class="callout exam" id="rule">
+    <div class="co-title">📌 所有大题共用一套书写模板：四行法</div>
+    <b>第一行公式 → 第二行代入 → 第三行结果 → 第四行单位/结论。</b> 哪怕最后算错，前三行也是分。<br>
+    反例：只写“index = 10 位”。正例：<code class="inline">行数 = 32 KB ÷ 32 B = 1024 = 2¹⁰，故 index = 10 位</code>。<br>
+    再提醒一句：题干写“写出计算过程”时，只给结果通常只能拿结果分；写清公式和位数来源，步骤分才是白送的。
+  </div>
+
+  <!-- ══════════════════ 一、Cache 地址划分 ══════════════════ -->
+  <h2 class="sec" id="cache">一、Cache / 主存地址划分（最高频）</h2>
+
+  <div class="callout cyan">
+    <div class="co-title">🔍 看到这些词，就用这套方法</div>
+    “Cache 容量 32 KB、块大小 32 B、直接映射 / 4 路组相联”“求 tag / index / offset 位数”“地址 0x… 映射到哪一行 / 哪一组”“求 Cache 总容量 / 实际所需位数”。
+  </div>
+
+  <table class="tbl">
+    <tr><th>要求的量</th><th>公式</th><th>说明</th></tr>
+    <tr><td>Cache 行数</td><td>数据区容量 ÷ 块大小</td><td>只用数据区，不含 tag / 有效位</td></tr>
+    <tr><td>组数</td><td>行数 ÷ 路数</td><td>直接映射：组数 = 行数；全相联：组数 = 1</td></tr>
+    <tr><td>块内地址 offset</td><td>log₂(块大小)</td><td>按字节编址，块内有多少字节就要几位</td></tr>
+    <tr><td>组索引 index</td><td>log₂(行数) 或 log₂(组数)</td><td>直接映射用行数；组相联用组数；全相联为 0</td></tr>
+    <tr><td>标记 tag</td><td>地址位数 − index − offset</td><td>三段相加必须等于地址总位数</td></tr>
+    <tr><td>每行附加位</td><td>tag + 1 位有效 +（写回 ? 1 位脏位 : 0）</td><td>写直达没有脏位</td></tr>
+    <tr><td>Cache 总容量</td><td>数据区容量 + 行数 × 附加位 ÷ 8</td><td>单位换成 B / KB，别留“位”</td></tr>
+  </table>
+
+  <figure class="vis" data-vis="cache-address">
+    <figcaption>图 大题-1 · 主存地址拆成 tag | index | offset 三段；低位是块内偏移，中间是索引，高位是标记。</figcaption>
+  </figure>
+
+  <div class="bq">
+    <div class="bq-q"><b>【例题 1-1 · 直接映射】</b>某计算机主存地址 32 位，按字节编址。Cache 数据区容量 32 KB，块大小 32 B，采用直接映射、写回法（write-back）、写分配。求：(1) offset、index、tag 各多少位；(2) Cache 有多少行；(3) 每行附加位与 Cache 总容量；(4) 主存地址 <code class="inline">0x12345678</code> 映射到哪一行，tag 是多少。</div>
+  </div>
+  <div data-steps="cache-direct"></div>
+
+  <h3 class="sub">例题 1-1 采分点（按 10 分）</h3>
+  <table class="tbl bq-score">
+    <tr><th>采分点</th><th>分值</th><th>怎么写才给分</th></tr>
+    <tr><td>offset = 5 位</td><td>1</td><td>写 log₂32 = 5，别只写 5</td></tr>
+    <tr><td>行数 = 1024</td><td>1</td><td>32 KB ÷ 32 B = 1024 = 2¹⁰</td></tr>
+    <tr><td>index = 10 位</td><td>1</td><td>直接映射：index = log₂(行数)</td></tr>
+    <tr><td>tag = 17 位</td><td>2</td><td>32 − 10 − 5 = 17，写出减法式</td></tr>
+    <tr><td>附加位 = 19 位</td><td>1</td><td>17 + 1 有效 + 1 脏位（写回）</td></tr>
+    <tr><td>总容量 = 35200 B</td><td>2</td><td>1024 × 275 位 = 281600 位 = 35200 B</td></tr>
+    <tr><td>行号 = 691（0x2B3）</td><td>1</td><td>地址右移 5 位取低 10 位</td></tr>
+    <tr><td>tag = 0x2468</td><td>1</td><td>地址右移 15 位</td></tr>
+  </table>
+
+  <div class="callout warn">
+    <div class="co-title">⚠️ 这道题的五个送命点</div>
+    ① 把 32 KB 当成 32 K 位（差 8 倍）；② 算 tag 时忘了先减 offset；③ 写回法漏掉脏位；④ 把“行数 1024”当成“index 10 位”抄成 1024 位；⑤ 用十进制心算位段，越算越乱——地址拆分一律转二进制或写移位。
+  </div>
+
+  <div class="bq">
+    <div class="bq-q"><b>【例题 1-2 · 4 路组相联】</b>某 Cache 数据区 64 KB，块大小 64 B，采用 4 路组相联、写回法，主存地址 32 位。求：(1) 行数、组数；(2) offset、index、tag 位数；(3) 每行附加位与总容量；(4) 地址 <code class="inline">0x0000A4C8</code> 落在哪一组，tag 是多少。</div>
+  </div>
+  <div data-steps="cache-set"></div>
+
+  <h3 class="sub">例题 1-2 采分点（按 10 分）</h3>
+  <table class="tbl bq-score">
+    <tr><th>采分点</th><th>分值</th><th>怎么写才给分</th></tr>
+    <tr><td>offset = 6 位</td><td>1</td><td>log₂64 = 6</td></tr>
+    <tr><td>行数 = 1024</td><td>1</td><td>64 KB ÷ 64 B</td></tr>
+    <tr><td>组数 = 256、index = 8 位</td><td>2</td><td>1024 ÷ 4 = 256 = 2⁸（除以路数是关键）</td></tr>
+    <tr><td>tag = 18 位</td><td>1</td><td>32 − 8 − 6</td></tr>
+    <tr><td>附加位 = 20 位 / 行</td><td>1</td><td>18 + 1 + 1</td></tr>
+    <tr><td>总容量 = 68096 B</td><td>2</td><td>65536 + 1024 × 20 ÷ 8</td></tr>
+    <tr><td>组号 = 147（0x93）</td><td>1</td><td>(0xA4C8 &gt;&gt; 6) &amp; 0xFF</td></tr>
+    <tr><td>tag = 2</td><td>1</td><td>0xA4C8 &gt;&gt; 14</td></tr>
+  </table>
+
+  <div class="callout warn">
+    <div class="co-title">⚠️ 组相联的专属陷阱</div>
+    组相联的 index 指向<b>组</b>，不是行。忘记“行数 ÷ 路数”会让 index 多 2 位、tag 少 2 位，后面全错。另一个高频错：把附加位算成“每组 20 位”——每行都有独立的 tag 和有效位，必须乘行数。
+  </div>
+
+  <div class="lab">
+    <div class="lab-title">🔢 实验室 · Cache 地址划分计算器</div>
+    <div class="lab-desc">改地址位数 / 容量 / 块大小 / 相联度，四段位数和总容量立刻跟着变。附加位按<b>写回法</b>（tag + 有效位 + 脏位）计算。</div>
+    <div class="lab-ctrl">
+      <label class="lab-field">地址位数<input id="cc-bits" type="number" value="32" min="8" max="64"></label>
+      <label class="lab-field">数据区容量（KB）<input id="cc-cap" type="number" value="32" min="1"></label>
+      <label class="lab-field">块大小（B）<input id="cc-block" type="number" value="32" min="2"></label>
+      <label class="lab-field">相联度
+        <select id="cc-ways">
+          <option value="1" selected>直接映射（1 路）</option>
+          <option value="2">2 路组相联</option>
+          <option value="4">4 路组相联</option>
+          <option value="8">8 路组相联</option>
+          <option value="full">全相联</option>
+        </select>
+      </label>
+      <button id="cc-run" type="button">计算</button>
+    </div>
+    <div id="cc-out"></div>
+  </div>
+
+  <!-- ══════════════════ 二、主存扩展 ══════════════════ -->
+  <h2 class="sec" id="chip">二、主存容量扩展（芯片扩展）</h2>
+
+  <div class="callout cyan">
+    <div class="co-title">🔍 看到这些词，就用这套方法</div>
+    “用 1K×4 位 SRAM 芯片组成 4K×8 位存储器”“需要多少片”“地址线如何分配 / 片选如何连接”“写出各芯片的地址范围”。
+  </div>
+
+  <table class="tbl">
+    <tr><th>要求的量</th><th>公式</th><th>说明</th></tr>
+    <tr><td>每组片数（位扩展）</td><td>目标字长 ÷ 单片字长</td><td>位数不够，并排拼宽</td></tr>
+    <tr><td>组数（字扩展）</td><td>目标字数 ÷ 每组字数</td><td>字数不够，一组组堆叠</td></tr>
+    <tr><td>总片数</td><td>每组片数 × 组数</td><td>也可用“总容量位数 ÷ 单片容量位数”验算</td></tr>
+    <tr><td>总地址位数</td><td>log₂(目标字数)</td><td>按字编址；按字节编址要另算</td></tr>
+    <tr><td>片内地址位数</td><td>log₂(每组字数)</td><td>直接接到所有芯片的地址端</td></tr>
+    <tr><td>片选位数</td><td>总地址位数 − 片内地址位数</td><td>高位经译码器产生片选</td></tr>
+    <tr><td>第 i 组地址范围</td><td>i × 每组字数 ~ i × 每组字数 + 每组字数 − 1</td><td>写成十六进制，检查首尾相接</td></tr>
+  </table>
+
+  <figure class="vis" data-vis="chip-expansion">
+    <figcaption>图 大题-2 · 位扩展把数据线拼宽，字扩展用译码器选组；片内地址并联，片选互斥。</figcaption>
+  </figure>
+
+  <div class="bq">
+    <div class="bq-q"><b>【例题 2-1 · 位扩展 + 字扩展】</b>用 <code class="inline">1K×4</code> 位 SRAM 芯片构成 <code class="inline">4K×8</code> 位存储器（按字编址）。求：(1) 需要多少片；(2) 地址线如何分配；(3) 片选逻辑怎么连；(4) 各组的地址范围。</div>
+  </div>
+  <div data-steps="chip-1k4"></div>
+
+  <h3 class="sub">例题 2-1 采分点（按 10 分）</h3>
+  <table class="tbl bq-score">
+    <tr><th>采分点</th><th>分值</th><th>怎么写才给分</th></tr>
+    <tr><td>位扩展：2 片/组</td><td>1</td><td>8 ÷ 4 = 2，说明一片接高 4 位、一片接低 4 位</td></tr>
+    <tr><td>字扩展：4 组</td><td>1</td><td>4K ÷ 1K = 4</td></tr>
+    <tr><td>总片数 8</td><td>1</td><td>2 × 4 = 8（或 32768 ÷ 4096）</td></tr>
+    <tr><td>地址 12 位、片内 10 位</td><td>2</td><td>4K = 2¹²；1K = 2¹⁰</td></tr>
+    <tr><td>片选 2 位 + 2:4 译码</td><td>2</td><td>A11A10 接译码器，输出接各组 CS</td></tr>
+    <tr><td>四组地址范围</td><td>3</td><td>0000H~03FFH、0400H~07FFH、0800H~0BFFH、0C00H~0FFFH</td></tr>
+  </table>
+
+  <div class="bq">
+    <div class="bq-q"><b>【例题 2-2 · 16 位字长】</b>用 <code class="inline">2K×8</code> 位芯片构成 <code class="inline">8K×16</code> 位存储器（按字编址）。求：总片数、地址线分配、数据线接法、各组地址范围。</div>
+  </div>
+  <div data-steps="chip-2k8"></div>
+
+  <h3 class="sub">例题 2-2 采分点（按 10 分）</h3>
+  <table class="tbl bq-score">
+    <tr><th>采分点</th><th>分值</th><th>怎么写才给分</th></tr>
+    <tr><td>每组 2 片（位扩展）</td><td>1</td><td>16 ÷ 8 = 2</td></tr>
+    <tr><td>4 组（字扩展）</td><td>1</td><td>8K ÷ 2K = 4</td></tr>
+    <tr><td>总片数 8</td><td>1</td><td>2 × 4</td></tr>
+    <tr><td>地址 13 位、片内 11 位、片选 2 位</td><td>3</td><td>13 = 11 + 2，三者写全</td></tr>
+    <tr><td>数据线高/低 8 位分开</td><td>1</td><td>一片接 D15~D8，一片接 D7~D0</td></tr>
+    <tr><td>四组地址范围</td><td>3</td><td>0000H~07FFH、0800H~0FFFH、1000H~17FFH、1800H~1FFFH</td></tr>
+  </table>
+
+  <div class="callout warn">
+    <div class="co-title">⚠️ 主存扩展的四个坑</div>
+    ① 只算字扩展、忘了位扩展，片数少一半；② 地址线忘了减片内地址，把 12 位全写成片选；③ 地址范围端点写错（每组 1K 应到 03FFH，不是 0400H）；④ 题目改成“按字节编址”时，地址线要多算，还要考虑字节选择。
+  </div>
+
+  <div class="callout exam">
+    <div class="co-title">🔁 反过来问也一样</div>
+    若题目给“地址空间 0000H~FFFFH、用 8K×8 芯片”：总空间 64 KB → 地址 16 位；8K = 2¹³ → 片内 13 位；片数 = 64K ÷ 8K = 8 片；片选 3 位，用 3:8 译码器。套路完全相同，只是起点换成了地址范围。
+  </div>
+
+  <!-- ══════════════════ 三、数据通路 ══════════════════ -->
+  <h2 class="sec" id="datapath">三、数据通路与微操作序列</h2>
+
+  <div class="callout cyan">
+    <div class="co-title">🔍 看到这些词，就用这套方法</div>
+    “根据数据通路图，写出取指周期的微操作及控制信号”“写出 ADD R1,(R2) 的执行过程”“指出每个时钟周期由哪两个部件占用总线”。
+  </div>
+
+  <table class="tbl">
+    <tr><th>部件</th><th>作用</th><th>常见控制信号</th></tr>
+    <tr><td>PC</td><td>存放下一条指令地址</td><td>PCout / PCin / PC+1</td></tr>
+    <tr><td>MAR</td><td>地址寄存器，接地址总线</td><td>MARin</td></tr>
+    <tr><td>MDR</td><td>数据寄存器，接数据总线</td><td>MDRout / MDRin</td></tr>
+    <tr><td>IR</td><td>指令寄存器，操作码送译码器</td><td>IRin / IRout</td></tr>
+    <tr><td>A、B</td><td>ALU 两个输入锁存器</td><td>Ain / Bin</td></tr>
+    <tr><td>ALU</td><td>完成算术逻辑运算</td><td>ALUop（ADD/SUB/…）、ALUout</td></tr>
+    <tr><td>R0~R3</td><td>通用寄存器</td><td>Rxout / Rxin</td></tr>
+  </table>
+
+  <div class="callout exam">
+    <div class="co-title">📌 单总线结构的三条铁律</div>
+    <b>① 一拍只能有一个 out：</b>总线同一时刻只能传一个数据，出现两个 out 就是总线冲突。<br>
+    <b>② 取指四步对所有指令相同：</b>PC→MAR、读存→MDR、MDR→IR、PC+1。这四步是公共分，先写稳。<br>
+    <b>③ PC 必须更新：</b>漏掉 PC+1 是最常见的扣分点；按字节编址且指令长 4 B 时是 PC+4。
+  </div>
+
+  <figure class="vis" data-vis="instruction-timing">
+    <figcaption>图 大题-3 · 取指、间址、执行、中断四个工作周期；取指周期是所有指令的公共前缀。</figcaption>
+  </figure>
+
+  <div class="bq">
+    <div class="bq-q"><b>【例题 3-1 · 读内存操作数】</b>某机采用单总线结构，指令 <code class="inline">ADD R1, (R2)</code> 的含义是 <code class="inline">R1 ← R1 + M[R2]</code>（寄存器间接寻址）。写出完整的取指、取数、执行微操作序列及控制信号。</div>
+  </div>
+  <div data-steps="dp-load"></div>
+
+  <h3 class="sub">例题 3-1 采分点（按 12 分）</h3>
+  <table class="tbl bq-score">
+    <tr><th>采分点</th><th>分值</th><th>怎么写才给分</th></tr>
+    <tr><td>取指 4 步完整</td><td>4</td><td>每步 1 分，顺序不能乱</td></tr>
+    <tr><td>控制信号正确</td><td>2</td><td>PCout/MARin、MemR、MDRout/IRin、PC+1</td></tr>
+    <tr><td>取数 3 步</td><td>3</td><td>R2→MAR、MemR、MDR→B</td></tr>
+    <tr><td>执行 2 步</td><td>2</td><td>R1→A、A+B→R1</td></tr>
+    <tr><td>PC 更新与写回目标</td><td>1</td><td>PC+1；结果写回 R1</td></tr>
+  </table>
+
+  <div class="bq">
+    <div class="bq-q"><b>【例题 3-2 · 写内存】</b>同样在单总线结构下，指令 <code class="inline">ST R1, X</code> 的含义是 <code class="inline">M[X] ← R1</code>（直接寻址，X 为指令中的地址字段）。写出取指与执行阶段的微操作序列。</div>
+  </div>
+  <div data-steps="dp-store"></div>
+
+  <h3 class="sub">例题 3-2 采分点（按 10 分）</h3>
+  <table class="tbl bq-score">
+    <tr><th>采分点</th><th>分值</th><th>怎么写才给分</th></tr>
+    <tr><td>取指 4 步</td><td>4</td><td>与例题 3-1 完全一致，照写即可</td></tr>
+    <tr><td>地址字段 → MAR</td><td>2</td><td>IRout、MARin，来源是 IR 不是 PC</td></tr>
+    <tr><td>数据 → MDR</td><td>2</td><td>R1out、MDRin</td></tr>
+    <tr><td>写命令 MemW</td><td>2</td><td>MDR→M，最后没有寄存器写回</td></tr>
+  </table>
+
+  <div class="callout warn">
+    <div class="co-title">⚠️ 数据通路的四个扣分点</div>
+    ① 一步里写了两个 out（如 <code class="inline">R1out, R2out, Ain</code>），总线不可能同时传两个数；② 漏 PC+1；③ 把 <code class="inline">ADD R1,(R2)</code> 的 R2 内容当操作数，忘记先送 MAR 再访存；④ 存数指令最后画蛇添足写“写回 R1”。
+  </div>
+
+  <div class="callout ok">
+    <div class="co-title">✅ 想再动手看一遍</div>
+    去 <a href="ch05.html#lab-datapath">第 5 章实验室 2 · 单总线数据通路步进</a>，高亮会告诉你每一拍是哪两个部件占用总线；把这里的 9 步和实验室里的 7 步对照，差异就在“取数”两拍。
+  </div>
+
+  <!-- ══════════════════ 四、流水线 ══════════════════ -->
+  <h2 class="sec" id="pipeline">四、流水线时空图与性能计算</h2>
+
+  <div class="callout cyan">
+    <div class="co-title">🔍 看到这些词，就用这套方法</div>
+    “5 段流水线、每段 1 个时钟周期、连续执行 n 条指令”“画时空图”“求吞吐率 / 加速比 / 效率”“插入 k 个停顿周期后……”
+  </div>
+
+  <table class="tbl">
+    <tr><th>要求的量</th><th>公式</th><th>说明</th></tr>
+    <tr><td>流水线周期 Δt</td><td>max(各段耗时)</td><td>不等长时取最长段，不能取平均</td></tr>
+    <tr><td>总周期数</td><td>k + n − 1 + 停顿数</td><td>k 段、n 条；停顿直接加</td></tr>
+    <tr><td>完成时间 T</td><td>总周期数 × Δt</td><td>单位跟 Δt 走</td></tr>
+    <tr><td>顺序执行时间 T₀</td><td>n × k × Δt（等长）或 n × Σtᵢ（不等长）</td><td>加速比的分子</td></tr>
+    <tr><td>吞吐率 TP</td><td>n ÷ T</td><td>单位：条/ns 或 条/s</td></tr>
+    <tr><td>加速比 S</td><td>T₀ ÷ T</td><td>无量纲，上限为 k</td></tr>
+    <tr><td>效率 E</td><td>S ÷ k；不等长时 T₀ ÷ (k × T)</td><td>等长也可写 n ÷ (k + n − 1)</td></tr>
+  </table>
+
+  <div class="bq">
+    <div class="bq-q"><b>【例题 4-1 · 等长流水线】</b>某 5 段流水线（IF / ID / EX / MEM / WB），每段耗时 1 个时钟周期，Δt = 2 ns。连续执行 100 条指令且无冒险。求：完成时间 T、吞吐率 TP、加速比 S、效率 E。</div>
+  </div>
+  <div data-steps="pipe-equal"></div>
+
+  <h3 class="sub">例题 4-1 采分点（按 10 分）</h3>
+  <table class="tbl bq-score">
+    <tr><th>采分点</th><th>分值</th><th>怎么写才给分</th></tr>
+    <tr><td>总周期 = 104</td><td>2</td><td>k + n − 1 = 5 + 100 − 1，不能写 500</td></tr>
+    <tr><td>T = 208 ns</td><td>2</td><td>104 × 2 ns，单位 ns</td></tr>
+    <tr><td>TP ≈ 0.481 条/ns</td><td>2</td><td>n ÷ T，单位写清</td></tr>
+    <tr><td>S ≈ 4.81</td><td>2</td><td>T₀ ÷ T，T₀ = 1000 ns</td></tr>
+    <tr><td>E ≈ 96.2%</td><td>2</td><td>S ÷ k 或 n ÷ 104</td></tr>
+  </table>
+
+  <div class="bq">
+    <div class="bq-q"><b>【例题 4-2 · 不等长流水线】</b>某 5 段流水线各段耗时为 2、1、3、1、2 ns，连续执行 100 条指令，无冒险。求 Δt、T、S、TP、E。</div>
+  </div>
+  <div data-steps="pipe-unequal"></div>
+
+  <h3 class="sub">例题 4-2 采分点（按 10 分）</h3>
+  <table class="tbl bq-score">
+    <tr><th>采分点</th><th>分值</th><th>怎么写才给分</th></tr>
+    <tr><td>Δt = 3 ns（取最大）</td><td>2</td><td>写 max(2,1,3,1,2)，说明被最慢段卡住</td></tr>
+    <tr><td>T = 312 ns</td><td>2</td><td>104 × 3</td></tr>
+    <tr><td>T₀ = 900 ns</td><td>2</td><td>(2+1+3+1+2) × 100，不能写 5×3×100</td></tr>
+    <tr><td>S ≈ 2.88</td><td>2</td><td>900 ÷ 312</td></tr>
+    <tr><td>E ≈ 57.7%</td><td>2</td><td>900 ÷ (5 × 312)，不能用 n/(k+n−1)</td></tr>
+  </table>
+
+  <div class="bq">
+    <div class="bq-q"><b>【例题 4-3 · 带停顿】</b>某 5 段流水线，Δt = 1 ns，连续执行 6 条指令。执行过程中因数据冒险和结构冒险共插入 2 个停顿周期。求 T、TP、S。</div>
+  </div>
+  <div data-steps="pipe-stall"></div>
+
+  <h3 class="sub">例题 4-3 采分点（按 8 分）</h3>
+  <table class="tbl bq-score">
+    <tr><th>采分点</th><th>分值</th><th>怎么写才给分</th></tr>
+    <tr><td>总拍数 = 12</td><td>2</td><td>(5 + 6 − 1) + 2，停顿要单独加</td></tr>
+    <tr><td>T = 12 ns</td><td>2</td><td>12 × 1 ns</td></tr>
+    <tr><td>TP = 0.5 条/ns</td><td>2</td><td>6 ÷ 12</td></tr>
+    <tr><td>S = 2.5</td><td>2</td><td>T₀ = 30 ns，30 ÷ 12</td></tr>
+  </table>
+
+  <figure class="vis" data-vis="pipeline-hazards">
+    <figcaption>图 大题-4 · 三类冒险与常见解法：结构冒险加资源，数据冒险用转发/停顿，控制冒险用预测/延迟槽。</figcaption>
+  </figure>
+
+  <div class="callout warn">
+    <div class="co-title">⚠️ 流水线计算的五个坑</div>
+    ① 总周期写成 n × k；② 不等长时 Δt 取平均；③ 加速比的分子用错（应是顺序执行时间）；④ 效率公式在不等长时还套 n/(k+n−1)；⑤ 单位混用（ns 与 μs、条/ns 与条/s）。
+  </div>
+
+  <div class="lab">
+    <div class="lab-title">🔢 实验室 · 流水线性能计算器</div>
+    <div class="lab-desc">改段数、周期、指令数和停顿数，直接得到 T / TP / S / E，并画出前 8 条指令的时空图。停顿按“后续指令整体右移”简化示意。</div>
+    <div class="lab-ctrl">
+      <label class="lab-field">段数 k<input id="pc-k" type="number" value="5" min="2" max="8"></label>
+      <label class="lab-field">周期 Δt（ns）<input id="pc-dt" type="number" value="2" min="0.1" step="0.5"></label>
+      <label class="lab-field">指令数 n<input id="pc-n" type="number" value="100" min="1"></label>
+      <label class="lab-field">停顿周期<input id="pc-stall" type="number" value="0" min="0"></label>
+      <button id="pc-run" type="button">计算</button>
+    </div>
+    <div id="pc-out"></div>
+  </div>
+
+  <!-- ══════════════════ 五、检查清单 ══════════════════ -->
+  <h2 class="sec" id="check">五、考前 60 秒检查清单</h2>
+  <p class="muted">写完一道大题，别急着翻页，按下面四组各扫一眼。这些地方每处都是 1~2 分。</p>
+  <table class="tbl">
+    <tr><th>题型</th><th>交卷前必须确认</th></tr>
+    <tr><td>Cache 地址划分</td><td>tag + index + offset 是否等于地址总位数；写回法有没有脏位；总容量单位是不是 B / KB；组相联有没有除以路数。</td></tr>
+    <tr><td>主存扩展</td><td>总片数 = 位扩展 × 字扩展；片选位数 = 总地址位数 − 片内位数；地址范围首尾相接、没有多 1 或少 1。</td></tr>
+    <tr><td>数据通路</td><td>取指四步是否完整；PC 有没有 +1；每一拍是否只有一个 out；读用 MemR、写用 MemW；写回目标寄存器对不对。</td></tr>
+    <tr><td>流水线</td><td>总周期是 k + n − 1（+ 停顿），不是 n × k；Δt 取最长段；S 的分子是顺序执行时间；E 的分母是 k × T；单位有没有写。</td></tr>
+    <tr><td>所有大题</td><td>公式是否单独成行；代入的数字是否抄对；结果有没有单位；画图题有没有先画骨架再填数。</td></tr>
+  </table>
+
+  <div class="callout ok">
+    <div class="co-title">✅ 下一步怎么练</div>
+    ① 把本页 9 道例题在纸上<b>默写一遍</b>，只看题干，不看步骤；② 去<a href="practice.html">练习场</a>按第 3、5 章筛题，把选择题正确率压到 90% 以上；③ 回<a href="method.html#wrong">备考方法论</a>把错题按“概念错 / 公式错 / 单位错 / 看错题”归类；④ 真题里的同类题，按本页的四行法重写一遍过程。
+  </div>
+</div>
+
+<footer>
+  408 计算机组成原理可视化课堂 · 大题演算<br>
+  <div class="pagers"><a href="index.html">← 返回总览</a><a href="practice.html">去练习场 →</a><a href="method.html">备考方法论 →</a></div>
+</footer>
+<script src="assets/visuals.js?v=1"></script>
+<script src="assets/bigq.js?v=1"></script>
+<script src="assets/app.js?v=1"></script>
+</body>
+</html>
