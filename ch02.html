@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 2 章 数据的表示和运算 · 408 计算机组成原理可视化课堂</title>
+<meta name="description" content="408 计算机组成原理第 2 章：原码反码补码、溢出判断、IEEE 754 浮点数、海明码与 CRC，附补码加法与浮点转换实验室。">
+<link rel="stylesheet" href="assets/style.css?v=1">
+</head>
+<body>
+<nav class="topbar"><div class="topbar-inner">
+  <a class="logo" href="index.html"><span class="dot"></span>408 计组可视化课堂</a>
+  <div class="nav-links">
+    <a href="index.html">总览</a><a href="ch01.html">系统概述</a><a href="ch02.html">数据表示</a><a href="ch03.html">存储系统</a><a href="ch04.html">指令系统</a><a href="ch05.html">CPU</a><a href="ch06.html">总线</a><a href="ch07.html">I/O</a><a href="practice.html">练习场</a><a href="method.html">备考方法论</a><a href="resources.html">资源导航</a>
+  </div>
+  <button class="theme-btn" title="切换明暗主题">🌙</button>
+</div></nav>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="kicker">CHAPTER 02 · 数据的表示和运算</span>
+    <h1>第 2 章 · 同样 8 个 0/1，怎样表示 −45？</h1>
+    <p>这一章是计组的“数学地基”：<b>补码让减法变加法，浮点让小数有统一格式，校验码让错误可被发现</b>。408 在这里既考选择题，也常在大题里让你写 IEEE 754 编码、判断溢出、算海明码。</p>
+    <p class="tagline">预计 4~5 小时 · 2 个交互实验室 · 12 道分级练习 · 高分值章节</p>
+    <div class="stats">
+      <div class="stat"><b>2ⁿ</b><span>补码的模运算本质</span></div>
+      <div class="stat"><b>1+8+23</b><span>单精度字段划分</span></div>
+      <div class="stat"><b>2ᵏ≥n+k+1</b><span>海明码校验位</span></div>
+    </div>
+  </div>
+
+  <div class="toc"><span class="toc-label">本页导航</span><a href="#goal">学习目标</a><a href="#s1">数制与编码</a><a href="#s2">定点表示</a><a href="#s3">定点运算</a><a href="#lab-tc">补码实验室</a><a href="#s4">IEEE 754</a><a href="#lab-f32">浮点实验室</a><a href="#s5">浮点运算</a><a href="#s6">校验码</a><a href="#deep">进阶</a><a href="#pit">避坑</a><a href="#quiz">练习</a><a href="#ck">打卡</a></div>
+
+  <div class="callout exam" id="goal"><div class="co-title">🎯 学习目标（学完你应该能）</div>
+  ① 写出任意十进制整数的 8/16 位原码、反码、补码、移码；<br>
+  ② 用双符号位或进位异或判断补码加减溢出；<br>
+  ③ 把十进制小数转成 IEEE 754 单精度编码，反之也能解析；<br>
+  ④ 说出浮点加减五步，解释“对阶为什么小阶向大阶看齐”；<br>
+  ⑤ 给定数据位数，算海明码校验位数并能定位 1 位错误；<br>
+  ⑥ 用模 2 除法求 CRC 余数。</div>
+
+  <h2 class="sec" id="s1">2.1 数制与编码：先把“位权”想清楚</h2>
+  <div class="callout life"><div class="co-title">🏦 生活类比</div>
+  十进制像“满十进一的收银台”，二进制像“只有 0 元和 1 元两种面额的收银台”。同一个金额，可以用不同面额组合表示；<b>位权</b>就是每个位置代表的面额。二进制第 i 位的位权是 2ⁱ。</div>
+  <p>408 常考的进制转换不多，但必须快且准：</p>
+  <table class="tbl">
+    <tr><th>转换</th><th>方法</th><th>例子</th></tr>
+    <tr><td>二 → 十</td><td>按位权展开求和</td><td>1011₂ = 8+0+2+1 = 11</td></tr>
+    <tr><td>十 → 二（整数）</td><td>除 2 取余，逆序排列</td><td>45 → 101101₂</td></tr>
+    <tr><td>二 ↔ 八/十六</td><td>3 位一组 / 4 位一组</td><td>1011 0110₂ = B6₁₆</td></tr>
+    <tr><td>十 → 二（小数）</td><td>乘 2 取整，顺序排列</td><td>0.375 → 0.011₂</td></tr>
+  </table>
+  <p><b>BCD 码</b>用 4 位二进制表示一位十进制数（8421 码），例如 59 = 0101 1001。它和纯二进制不同：BCD 的 1010~1111 是无效编码。408 可能考“BCD 加法后是否需要加 6 修正”，了解即可。</p>
+
+  <h2 class="sec" id="s2">2.2 定点数表示：原码、反码、补码、移码</h2>
+  <p>定点数的小数点位置固定：要么固定在最低位之后（定点整数），要么固定在符号位之后（定点小数）。机器数把符号位也编进二进制，最高位通常为符号位（0 正 1 负）。</p>
+
+  <table class="tbl">
+    <tr><th>编码</th><th>正数</th><th>负数（以 −45 为例）</th><th>8 位范围</th><th>零的个数</th></tr>
+    <tr><td><b>原码</b></td><td>符号位 0 + 绝对值</td><td>1 010 1101 = <code class="inline">10101101</code></td><td>−127 ~ +127</td><td>2 个</td></tr>
+    <tr><td><b>反码</b></td><td>同原码</td><td>原码除符号位外按位取反 = <code class="inline">11010010</code></td><td>−127 ~ +127</td><td>2 个</td></tr>
+    <tr><td><b>补码</b></td><td>同原码</td><td>反码末位加 1 = <code class="inline">11010011</code></td><td>−128 ~ +127</td><td>1 个</td></tr>
+    <tr><td><b>移码</b></td><td>补码符号位取反</td><td><code class="inline">01010011</code>（−45+128=83）</td><td>−128 ~ +127</td><td>1 个</td></tr>
+  </table>
+
+  <div class="callout exam"><div class="co-title">📌 补码的本质：模 2ⁿ 的“同余”</div>
+  n 位补码把负数 X 表示为 <b>2ⁿ + X</b>。例如 8 位时 −45 的补码 = 256 − 45 = 211 = <code class="inline">11010011</code>。这样一来，<b>A − B 可以变成 A + (2ⁿ − B)</b>，减法器就可以用加法器实现。溢出被“模”自然丢掉，剩下的低 n 位就是正确结果（只要不超出范围）。</div>
+
+  <h3 class="sub">符号扩展与移位</h3>
+  <p><b>符号扩展：</b>把短补码扩展为长补码时，高位全部补符号位。例如 8 位 <code class="inline">1000 1010</code> 扩展到 16 位是 <code class="inline">1111 1111 1000 1010</code>；正数则补 0。</p>
+  <p><b>算术移位：</b>左移末位补 0；右移高位补符号位。补码算术右移相当于除以 2 并向负无穷取整（−24 → −12，−25 → −13）。<b>逻辑移位</b>则不分符号，右移高位补 0。</p>
+  <div class="callout warn"><div class="co-title">⚠️ 左移会改变符号</div>
+  补码左移一位相当于乘 2，但如果最高有效位被移出，符号会翻转，结果溢出。判断方法与加法溢出相同：移位前后符号位是否一致。</div>
+
+  <h2 class="sec" id="s3">2.3 定点运算与溢出判断</h2>
+  <p>补码加减法统一为加法：<code class="inline">[A−B]补 = [A]补 + [−B]补</code>，其中 <code class="inline">[−B]补</code> 是 <code class="inline">[B]补</code> 连同符号位一起取反再加 1。</p>
+  <div class="formula">
+    [A + B]<sub>补</sub> = [A]<sub>补</sub> + [B]<sub>补</sub> （mod 2ⁿ）<br>
+    [A − B]<sub>补</sub> = [A]<sub>补</sub> + [−B]<sub>补</sub>
+  </div>
+
+  <h3 class="sub">溢出判断的两种常用方法</h3>
+  <table class="tbl">
+    <tr><th>方法</th><th>判据</th><th>说明</th></tr>
+    <tr><td>单符号位 + 进位</td><td>符号位进位 C<sub>in</sub> 与最高位进位 C<sub>out</sub> 异或为 1</td><td>C<sub>in</sub> ⊕ C<sub>out</sub> = 1 表示溢出；同号相加才可能溢出</td></tr>
+    <tr><td>双符号位（变形补码）</td><td>00 / 11 正常；01 正溢；10 负溢</td><td>两个符号位一起参与运算，最高位是真正的符号，次高位用于判溢</td></tr>
+    <tr><td>符号判断</td><td>两正相加得负 → 正溢；两负相加得正 → 负溢</td><td>最直观，适合口算检查</td></tr>
+  </table>
+
+  <p><b>例：</b>8 位补码 97 + 45。97 = <code class="inline">0110 0001</code>，45 = <code class="inline">0010 1101</code>，相加得 <code class="inline">1000 1110</code>。两个正数相加结果符号位为 1，发生<b>正溢出</b>；双符号位为 <code class="inline">01</code>。</p>
+
+  <div class="lab" id="lab-twos">
+    <div class="lab-title">🔬 实验室 1 · 补码加法与溢出</div>
+    <div class="lab-desc">输入两个整数，选 8/16 位，观察双符号位和溢出判断。试试 97+45、−100−50、−128−1。</div>
+    <div class="lab-stage">
+      <div class="lab-ctrl">
+        <label class="lab-field">A<input id="tc-a" type="number" value="97" step="1"></label>
+        <label class="lab-field">B<input id="tc-b" type="number" value="45" step="1"></label>
+        <label class="lab-field">位数<select id="tc-bits"><option value="8">8 位</option><option value="16">16 位</option></select></label>
+        <button id="tc-go" type="button">计算补码和</button>
+      </div>
+      <div class="lab-out" id="tc-out"></div>
+      <div class="lab-kv" id="tc-kv"></div>
+    </div>
+    <div class="lab-note" id="tc-note"></div>
+  </div>
+
+  <h3 class="sub">乘法与除法（概念 + 考法）</h3>
+  <p><b>原码一位乘：</b>符号位单独异或，绝对值相乘。每次根据乘数最低位决定“加被乘数”还是“加 0”，然后部分积右移。n 位需要 n 次“加 + 右移”。</p>
+  <p><b>Booth 补码乘法：</b>把乘数末尾附加一位 Q<sub>−1</sub>=0，根据 <code class="inline">Q₀Q₋₁</code> 的四种组合决定 +M、−M 或 0，然后算术右移。它可以直接处理带符号数，不必先取绝对值。</p>
+  <table class="tbl">
+    <tr><th>Q₀</th><th>Q₋₁</th><th>操作</th></tr>
+    <tr><td>0</td><td>0</td><td>部分积 +0，算术右移</td></tr>
+    <tr><td>0</td><td>1</td><td>部分积 +M，算术右移</td></tr>
+    <tr><td>1</td><td>0</td><td>部分积 −M，算术右移</td></tr>
+    <tr><td>1</td><td>1</td><td>部分积 +0，算术右移</td></tr>
+  </table>
+  <p><b>除法：</b>恢复余数法每次减除数，若余数为负就加回来；加减交替法（不恢复余数法）根据余数符号决定下一步加还是减，步骤更少。408 选择题可能考“需要多少次加减/移位”，掌握流程即可。</p>
+
+  <h2 class="sec" id="s4">2.4 浮点数：小数点会“浮动”</h2>
+  <div class="callout life"><div class="co-title">🔬 生活类比</div>
+  浮点数像<b>科学计数法</b>：123000 可以写成 1.23×10⁵，0.00123 写成 1.23×10⁻³。小数点位置随阶码移动，所以叫“浮点”。计算机用二进制做同样的事：<b>符号 + 阶码 + 尾数</b>。</div>
+
+  <p>一个浮点数的值可以写成：</p>
+  <div class="formula">V = (−1)<sup>S</sup> × M × 2<sup>E</sup></div>
+  <p>其中 S 是符号位，M 是尾数（规格化后通常为 1.xxx），E 是阶码（实际指数）。为了用定点整数表示负指数，IEEE 754 使用<b>偏置阶码</b>：存储的阶码字段 = 实际指数 + 偏置值。</p>
+
+  <table class="tbl">
+    <tr><th>格式</th><th>总位数</th><th>符号 S</th><th>阶码 E</th><th>尾数 M</th><th>偏置</th></tr>
+    <tr><td>单精度 float</td><td>32</td><td>1</td><td>8</td><td>23</td><td>127</td></tr>
+    <tr><td>双精度 double</td><td>64</td><td>1</td><td>11</td><td>52</td><td>1023</td></tr>
+  </table>
+
+  <h3 class="sub">规格化与隐含的 1</h3>
+  <p>规格化浮点数的尾数满足 <code class="inline">1 ≤ M &lt; 2</code>，二进制形式为 <code class="inline">1.xxxxx</code>。既然最高位总是 1，IEEE 754 就<b>不存这个 1</b>，只存小数点后的 23/52 位，相当于白赚一位精度。所以单精度有效位数是 24 位（1 位隐含 + 23 位显式）。</p>
+
+  <p><b>例：</b>把 −12.375 转成单精度。</p>
+  <pre class="code">12.375 = 1100.011₂ = 1.100011₂ × 2³
+S = 1（负数）
+E = 3 + 127 = 130 = 10000010₂
+M = 10001100000000000000000₂（小数点后 23 位）
+拼接：1 10000010 10001100000000000000000
+十六进制：0xC1460000</pre>
+
+  <div class="lab" id="lab-float">
+    <div class="lab-title">🔬 实验室 2 · IEEE 754 转换器</div>
+    <div class="lab-desc">支持单/双精度。输入十进制数点“十进制 → 浮点”，或输入十六进制点“十六进制 → 十进制”。试试 −12.375、0.1、3.4e38、1e-45。</div>
+    <div class="lab-stage">
+      <div class="lab-ctrl">
+        <label class="lab-field">十进制数<input id="f32-dec" type="text" value="-12.375"></label>
+        <label class="lab-field">精度<select id="f32-type"><option value="32">单精度 32 位</option><option value="64">双精度 64 位</option></select></label>
+        <button id="f32-go" type="button">十进制 → 浮点</button>
+      </div>
+      <div class="lab-ctrl">
+        <label class="lab-field">十六进制编码<input id="f32-hex" type="text" value="0xC1460000"></label>
+        <button id="f32-rev-go" class="ghost" type="button">十六进制 → 十进制</button>
+      </div>
+      <div id="f32-out"></div>
+    </div>
+    <div class="lab-note" id="f32-note"></div>
+  </div>
+
+  <h3 class="sub">特殊值与表示范围</h3>
+  <table class="tbl">
+    <tr><th>阶码 E</th><th>尾数 M</th><th>含义</th></tr>
+    <tr><td>全 0</td><td>全 0</td><td>±0（符号位决定 +0/−0）</td></tr>
+    <tr><td>全 0</td><td>非 0</td><td>非规格化数，值 = 0.M × 2<sup>1−bias</sup></td></tr>
+    <tr><td>全 1</td><td>全 0</td><td>±∞</td></tr>
+    <tr><td>全 1</td><td>非 0</td><td>NaN（非数）</td></tr>
+    <tr><td>1 ~ 254</td><td>任意</td><td>规格化数，值 = 1.M × 2<sup>E−127</sup></td></tr>
+  </table>
+  <p>单精度的关键量级：最大正数约 <b>3.4×10³⁸</b>，最小正规格化数约 <b>1.18×10⁻³⁸</b>，最小正非规格化数约 <b>1.4×10⁻⁴⁵</b>，有效十进制位数约 <b>7 位</b>。双精度对应约 1.8×10³⁰⁸、2.2×10⁻³⁰⁸、5×10⁻³²⁴、16 位有效数字。</p>
+
+  <h2 class="sec" id="s5">2.5 浮点运算：五步走</h2>
+  <div class="steps">
+    <div class="step"><b>对阶：</b>比较两个数的阶码，<b>小阶向大阶看齐</b>。小阶数的尾数右移，每右移一位阶码加 1。</div>
+    <div class="step"><b>尾数加减：</b>阶码统一后，对尾数做加/减。注意尾数是带符号的定点小数。</div>
+    <div class="step"><b>规格化：</b>若尾数最高位不是 1，左规（尾数左移、阶码减）；若尾数溢出（出现 10.xxx 或 01.xxx），右规（尾数右移、阶码加）。</div>
+    <div class="step"><b>舍入：</b>右移或规格化可能丢位，按 IEEE 754 的舍入方式处理。默认“就近舍入到偶数”。</div>
+    <div class="step"><b>溢出判断：</b>阶码超出上限 → 溢出（∞）；低于下限 → 下溢（按 0 或非规格化数处理）。</div>
+  </div>
+  <div class="callout warn"><div class="co-title">⚠️ 为什么小阶向大阶看齐？</div>
+  如果让大阶数的尾数左移去迁就小阶，尾数可能超出表示范围而丢失高位，造成<b>大数被破坏</b>。让小阶数的尾数右移，丢的是低位（精度损失），不会破坏数量级。所以对阶方向不能反。</div>
+
+  <h3 class="sub">舍入方式</h3>
+  <table class="tbl">
+    <tr><th>方式</th><th>规则</th><th>特点</th></tr>
+    <tr><td>就近舍入到偶数</td><td>最接近的值；正好居中时取偶数</td><td>IEEE 754 默认，误差最小且无统计偏差</td></tr>
+    <tr><td>朝零舍入</td><td>直接截断</td><td>实现简单，误差偏向零</td></tr>
+    <tr><td>朝 +∞ / −∞</td><td>向正/负方向取最近可表示值</td><td>用于区间运算</td></tr>
+  </table>
+  <p><b>经典问题：</b>0.1 + 0.2 在双精度下不等于 0.3，而是 0.30000000000000004。因为 0.1、0.2、0.3 都不能用有限二进制精确表示，存储时已经舍入，相加后再舍入，误差就显现出来。这不是“计算机算错了”，而是二进制浮点的表示精度问题。</p>
+
+  <h2 class="sec" id="s6">2.6 校验码：让错误暴露出来</h2>
+  <h3 class="sub">奇偶校验</h3>
+  <p>在数据后加 1 位校验位，使整个码字中 1 的个数为奇数（奇校验）或偶数（偶校验）。它只能检测<b>奇数个位</b>出错，不能纠错；偶数个位同时出错会漏检。</p>
+
+  <h3 class="sub">海明码：能定位 1 位错误</h3>
+  <p>设数据位 n 位、校验位 k 位，需满足：</p>
+  <div class="formula">2<sup>k</sup> ≥ n + k + 1</div>
+  <p>校验位放在 2⁰、2¹、2²…（即第 1、2、4、8… 位），其余位置放数据。每个校验位负责一组位置（按位置编号的二进制位分组），用偶校验或奇校验填充。接收端重新计算各组校验值，得到的<b>故障字</b>直接指出出错位置。</p>
+  <p><b>例：</b>n=4，k=3，总码字 7 位。数据放在 3、5、6、7 位，校验位在 1、2、4 位：</p>
+  <table class="tbl">
+    <tr><th>校验位</th><th>负责的位置</th><th>依据</th></tr>
+    <tr><td>P1（第 1 位）</td><td>1, 3, 5, 7</td><td>位置编号最低位为 1</td></tr>
+    <tr><td>P2（第 2 位）</td><td>2, 3, 6, 7</td><td>位置编号次低位为 1</td></tr>
+    <tr><td>P4（第 4 位）</td><td>4, 5, 6, 7</td><td>位置编号第 3 位为 1</td></tr>
+  </table>
+  <p>海明码可纠正 1 位错误、检测 2 位错误（标准海明码对 2 位错误可能误纠，实际常用扩展海明码加 1 位总校验位）。</p>
+
+  <h3 class="sub">CRC：模 2 除法</h3>
+  <p>CRC 把数据看成多项式，用一个生成多项式 G(x) 去除，余数作为校验位。若 G(x) 的最高次为 r，则校验位 r 位。发送方把数据左移 r 位后做<b>模 2 除法</b>（异或，不借位），余数附在数据后。</p>
+  <p><b>例：</b>数据 1101，G(x)=x³+x+1 → 1011（r=3）。数据左移 3 位得 1101000，除以 1011：</p>
+  <pre class="code">1101000 ÷ 1011（模 2 除）
+余数 = 001
+发送码字 = 1101 001</pre>
+  <p>接收方用同一 G(x) 除收到的码字，余数为 0 则认为无错（或错误未检出）。CRC 检错能力强、实现简单，广泛用于网络和存储。</p>
+
+  <h2 class="sec" id="deep">🚀 进阶深挖（教材级）</h2>
+  <h3 class="sub">深挖 1 · 为什么补码的符号位可以参与运算？</h3>
+  <p>因为补码把有符号数映射到模 2ⁿ 的同余类：−45 和 211 在模 256 下等价。加法器只做无符号加法，高位进位自然丢弃，结果仍然落在正确的同余类里。只要真实结果在 [−2ⁿ⁻¹, 2ⁿ⁻¹−1] 内，低 n 位就是正确的补码；超出范围才发生溢出。</p>
+
+  <h3 class="sub">深挖 2 · 浮点数的“精度”和“范围”不是一回事</h3>
+  <p>范围由阶码位数决定，精度由尾数位数决定。单精度尾数 23 位，约 7 位十进制有效数字；双精度 52 位，约 16 位。一个数可以很大（范围够）但很粗糙（精度不够），例如 1e20 在单精度下只能表示到约 7 位有效数字。做题时先问：题目要的是“能表示多大”还是“能精确到几位”。</p>
+
+  <h3 class="sub">深挖 3 · 海明码故障字与纠错</h3>
+  <p>接收端对每组重新做偶校验，若第 1 组错记 1、第 2 组错记 2、第 4 组错记 4，把出错的组号相加，得到的数就是出错位的位置。例如故障字为 6 = 2+4，说明第 6 位出错，取反即可纠正。若故障字为 0，说明无错（或错误恰好互相抵消）。</p>
+
+  <div class="callout views"><div class="co-title">🌐 多源视角</div>
+  <ul>
+    <li><b>【唐朔飞】</b>把补码定义为“模 2ⁿ 意义下的机器数”，先讲模运算再讲编码。本站用法：遇到“为什么补码能表示 −128”时，回到 2⁸=256 的同余类，不要死记范围。</li>
+    <li><b>【CSAPP】</b>用“位向量 + 无符号/有符号解释”讲同一串位。本站用法：同一串 <code class="inline">11111111</code>，无符号是 255，补码是 −1，原码是 −127；题目问“值”之前先确认编码。</li>
+    <li><b>【IEEE 754 标准】</b>把浮点分成规格化、非规格化、无穷、NaN 四类，并规定默认舍入为“就近到偶数”。本站用法：看到 E 全 0 或全 1，先查特殊值表，不要代普通公式。</li>
+  </ul>
+  <div class="src">参考：唐朔飞《计算机组成原理》第 2、6 章；CSAPP 第 2 章；IEEE 754-2019。</div></div>
+
+  <h2 class="sec" id="pit">⚠️ 本章避坑清单</h2>
+  <div class="steps">
+    <div class="step">补码的 −128 没有对应的原码/反码（8 位原码最小是 −127），题目说“求 −128 的原码”是在挖坑。</div>
+    <div class="step">符号扩展补的是<b>符号位</b>，不是补 0；只有正数才补 0。</div>
+    <div class="step">算术右移高位补符号位，逻辑右移高位补 0；C 语言里有符号数右移通常是算术右移，但标准未完全规定，考试按算术右移。</div>
+    <div class="step">IEEE 754 的阶码是<b>偏置</b>后的无符号数，实际指数 = 阶码 − 127（单精度）；不要把 130 当成实际指数。</div>
+    <div class="step">规格化数有隐含的 1，非规格化数没有；E 全 0 时不能用 1.M 公式。</div>
+    <div class="step">浮点对阶是<b>小阶向大阶</b>看齐，不是大阶向小阶。</div>
+    <div class="step">海明码校验位放在 1、2、4、8… 位，不是放在末尾；CRC 余数位数等于生成多项式最高次，不是数据位数。</div>
+  </div>
+
+  <h2 class="sec" id="quiz">📝 章内练习（<span data-quiz-count>12</span> 题 · 基础 → 提高 → 真题改编）</h2>
+  <p class="muted">补码、IEEE 754、海明码、CRC 全覆盖。建议先在本子上算，再点选项。</p>
+  <div data-quiz-ch="2"></div>
+
+  <h2 class="sec" id="ck">✅ 本章打卡</h2>
+  <div data-ck-scope>
+    <p><span class="progress-pill">0 / 6 已打卡</span></p>
+    <div class="checklist">
+      <label class="check-item" data-ck="c2-1"><input type="checkbox"><span>能写出 −45 的 8 位原码、反码、补码、移码</span></label>
+      <label class="check-item" data-ck="c2-2"><input type="checkbox"><span>能用双符号位判断 97+45、−100−50 是否溢出</span></label>
+      <label class="check-item" data-ck="c2-3"><input type="checkbox"><span>能把 −12.375 转成 IEEE 754 单精度，并说出每一步</span></label>
+      <label class="check-item" data-ck="c2-4"><input type="checkbox"><span>能默写浮点加减五步，并解释对阶方向</span></label>
+      <label class="check-item" data-ck="c2-5"><input type="checkbox"><span>给定 n 位数据，能算海明码校验位数并说出校验位位置</span></label>
+      <label class="check-item" data-ck="c2-6"><input type="checkbox"><span>能用模 2 除法求 CRC 余数</span></label>
+    </div>
+  </div>
+</div>
+
+<footer>
+  408 计算机组成原理可视化课堂 · 基础教学 + 交互实验室 + 分级题库<br>
+  <div class="pagers"><a href="ch01.html">← 第 1 章 系统概述</a><a href="ch03.html">第 3 章 存储系统 →</a><a href="practice.html">去练习场 →</a></div>
+</footer>
+<script src="assets/questions.js?v=1"></script>
+<script src="assets/app.js?v=1"></script>
+<script src="assets/labs.js?v=1"></script>
+</body>
+</html>
