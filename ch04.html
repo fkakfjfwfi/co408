@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>第 4 章 指令系统 · 408 计算机组成原理可视化课堂</title>
 <meta name="description" content="408 计算机组成原理第 4 章：指令格式、扩展操作码、十种寻址方式、RISC/CISC、机器级代码、大小端与对齐，附寻址计算实验室。">
-<link rel="stylesheet" href="assets/style.css?v=1">
+<link rel="stylesheet" href="assets/style.css?v=2">
 </head>
 <body>
 <nav class="topbar"><div class="topbar-inner">
@@ -51,6 +51,11 @@
     <tr><td>二地址</td><td>2</td><td>最常见的双操作数运算</td><td><code class="inline">ADD R1, R2</code></td></tr>
     <tr><td>三地址</td><td>3</td><td>两个源 + 一个目的，互不覆盖</td><td><code class="inline">ADD R1, R2, R3</code></td></tr>
   </table>
+
+  <figure class="vis" data-vis="instruction-format">
+    <figcaption>图 4-1 · 指令就是一条“位域拼图”：操作码说明做什么，地址码说明对谁做</figcaption>
+  </figure>
+
   <p><b>指令字长</b>是一条指令的二进制位数，可以等于机器字长，也可以是它的整数倍。定长指令字长便于硬件译码和流水线；变长指令字长可以节省空间，但取指和译码更复杂（x86 就是变长）。</p>
 
   <h2 class="sec" id="s2">4.2 扩展操作码：在有限位数里塞更多指令</h2>
@@ -58,6 +63,11 @@
   <div class="callout warn"><div class="co-title">⚠️ 唯一铁律</div>
   <b>短操作码不能是长操作码的前缀。</b>否则译码器读到短码时，无法判断这是完整指令还是更长指令的开头。例如 4 位操作码用了 0000~1110，1111 才能作为扩展前缀；扩展出的长码必须以 1111 开头，且不能与任何短码相同。</div>
   <p><b>常见设计：</b>4 位基本操作码，0000~1110 表示 15 条三地址指令；1111 作为前缀，再用下一个 4 位扩展出 15 条二地址指令；1111 1111 再扩展……每层留一个“全 1”作为继续扩展的标志。具体能扩展多少条，取决于还剩多少位可用。</p>
+
+  <figure class="vis" data-vis="extended-opcode">
+    <figcaption>图 4-2 · 扩展操作码：每一层都留一个全 1 前缀，短码不能和长码“撞头”</figcaption>
+  </figure>
+
   <p><b>考法：</b>题目给“指令字长 16 位、操作码 4 位、地址码 4 位、要求支持 X 条三地址、Y 条二地址……”，让你判断是否可行或求某字段位数。做法：先满足短码数量，再算剩余编码空间，注意前缀约束。</p>
 
   <h2 class="sec" id="s3">4.3 寻址方式：操作数到底在哪</h2>
@@ -75,6 +85,10 @@
     <tr><td>变址寻址</td><td>EA = (IX) + A</td><td>1</td><td>数组/循环，IX 可变</td></tr>
     <tr><td>堆栈寻址</td><td>操作数在栈顶</td><td>0 或 1</td><td>与 push/pop 配合，支持零地址运算</td></tr>
   </table>
+
+  <figure class="vis" data-vis="addressing-modes">
+    <figcaption>图 4-3 · 寻址方式就是“操作数到底在哪”：直接去主存、先取地址再取数、或从寄存器拿</figcaption>
+  </figure>
 
   <div class="callout exam"><div class="co-title">📌 基址 vs 变址：公式像，用途不同</div>
   两者都写成 <code class="inline">EA = 寄存器 + A</code>，但：<b>基址寻址</b>的寄存器内容由操作系统/程序固定（程序首地址），A 是位移，用于程序重定位；<b>变址寻址</b>的 A 是数组首地址，寄存器内容是变化的索引，用于访问数组元素。做题时看“谁在变”。</div>
@@ -133,6 +147,11 @@
     <div class="step"><b>局部变量与保存的寄存器：</b>函数内部使用的局部变量、被调用者保存寄存器。</div>
     <div class="step"><b>返回：</b><code class="inline">leave</code> / <code class="inline">ret</code> 恢复栈指针和帧指针，弹出返回地址跳回。</div>
   </div>
+
+  <figure class="vis" data-vis="stack-frame">
+    <figcaption>图 4-4 · 栈帧：参数、返回地址、旧 RBP、局部变量依次压在栈上，RSP/RBP 记住当前边界</figcaption>
+  </figure>
+
   <p>x86-64 中常见约定：整数参数依次用 <code class="inline">%rdi, %rsi, %rdx, %rcx, %r8, %r9</code>，返回值在 <code class="inline">%rax</code>，栈向低地址增长，<code class="inline">%rsp</code> 是栈指针，<code class="inline">%rbp</code> 是帧指针。</p>
 
   <pre class="code">// C 语言
@@ -173,6 +192,11 @@ sum:
     <tr><td>大端（big-endian）</td><td>最高有效字节</td><td>12 34 56 78</td><td>部分 RISC、网络字节序</td></tr>
     <tr><td>小端（little-endian）</td><td>最低有效字节</td><td>78 56 34 12</td><td>x86、ARM（可配置）</td></tr>
   </table>
+
+  <figure class="vis" data-vis="endian">
+    <figcaption>图 4-5 · 大小端：同一串 0x12345678，大端“正着放”，小端“倒着放”</figcaption>
+  </figure>
+
   <p>判断技巧：把数据写成 0x12345678，<b>小端就是“倒着抄”</b>：78 56 34 12。题目若给“从低地址到高地址的字节”，按这个顺序写。</p>
 
   <h3 class="sub">边界对齐</h3>
@@ -237,6 +261,7 @@ sum:
 </footer>
 <script src="assets/questions.js?v=1"></script>
 <script src="assets/app.js?v=1"></script>
+<script src="assets/visuals.js?v=1"></script>
 <script src="assets/labs.js?v=1"></script>
 </body>
 </html>
