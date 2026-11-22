@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>第 1 章 计算机系统概述 · 408 计算机组成原理可视化课堂</title>
 <meta name="description" content="408 计算机组成原理第 1 章：冯·诺依曼结构、计算机层次、指令执行过程与性能指标，附性能换算实验室。">
-<link rel="stylesheet" href="assets/style.css?v=1">
+<link rel="stylesheet" href="assets/style.css?v=2">
 </head>
 <body>
 <nav class="topbar"><div class="topbar-inner">
@@ -41,6 +41,10 @@
   <h2 class="sec" id="s1">1.1 从“算盘”到“存储程序”</h2>
   <div class="callout life"><div class="co-title">🍳 生活类比</div>
   早期的计算工具像<b>厨房里的一整套手动工具</b>：要做什么菜，人得一步一步操作。冯·诺依曼机的想法是：把<b>菜谱（程序）和食材（数据）一起放进机器</b>，机器自己按菜谱顺序取步骤、取食材、开火翻炒——这就是“存储程序”。</div>
+
+  <figure class="vis" data-vis="von-neumann">
+    <figcaption>图 1-1 · 冯·诺依曼结构：输入的数据和程序都先进入存储器，CPU 再从存储器取指、取数</figcaption>
+  </figure>
 
   <p>冯·诺依曼在 1945 年提出“存储程序”计算机方案，核心可以压缩成一句话：<b>指令和数据以同等地位存放在同一存储器中，机器按地址访问、按顺序自动执行</b>。它的经典特点有：</p>
   <div class="steps">
@@ -83,6 +87,10 @@
     <div class="step"><b>写回（WB）：</b>把结果写回寄存器或主存；若为转移指令，则修改 PC。</div>
   </div>
 
+  <figure class="vis" data-vis="instruction-cycle">
+    <figcaption>图 1-2 · 一条指令的五段旅程：取指 → 译码 → 取操作数 → 执行 → 写回，然后 PC 指向下一条</figcaption>
+  </figure>
+
   <div class="callout exam"><div class="co-title">📌 408 高频：取指数据流</div>
   <code class="inline">PC → MAR → 主存 → MDR → IR</code>，同时 <code class="inline">PC + “1” → PC</code>。这里的“1”不是固定 1 个字节，而是<b>一条指令的长度</b>；在按字编址、指令字长为一个字时才是加 1。选择题常把“PC 加 1”写成固定加 1 来设陷阱。</div>
 
@@ -105,6 +113,10 @@
   </table>
   <div class="callout cyan"><div class="co-title">🔍 “透明”是什么意思</div>
   在计算机体系结构中，“透明”指<b>存在但上层看不见</b>。例如微程序对机器语言程序员透明：写机器指令的人不需要知道微指令怎么编。注意不是“不存在”，也不是“看不见所以不重要”。</div>
+
+  <figure class="vis" data-vis="hierarchy">
+    <figcaption>图 1-3 · 多级层次：越往上越接近人，越往下越接近硬件；上一层靠下一层实现</figcaption>
+  </figure>
 
   <p><b>编译 vs 解释：</b>编译程序把高级语言源程序整体翻译成目标程序，之后可反复执行；解释程序逐条翻译并立即执行，通常不生成独立目标文件。编译执行快、但多一步构建；解释灵活、但运行时开销大。汇编程序则是把汇编语言翻译成机器语言。</p>
 
@@ -221,6 +233,7 @@ MIPS     = 2000 MHz / 4 = 500</pre>
 </footer>
 <script src="assets/questions.js?v=1"></script>
 <script src="assets/app.js?v=1"></script>
+<script src="assets/visuals.js?v=1"></script>
 <script src="assets/labs.js?v=1"></script>
 </body>
 </html>
