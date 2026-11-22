@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 1 章 计算机系统概述 · 408 计算机组成原理可视化课堂</title>
+<meta name="description" content="408 计算机组成原理第 1 章：冯·诺依曼结构、计算机层次、指令执行过程与性能指标，附性能换算实验室。">
+<link rel="stylesheet" href="assets/style.css?v=1">
+</head>
+<body>
+<nav class="topbar"><div class="topbar-inner">
+  <a class="logo" href="index.html"><span class="dot"></span>408 计组可视化课堂</a>
+  <div class="nav-links">
+    <a href="index.html">总览</a><a href="ch01.html">系统概述</a><a href="ch02.html">数据表示</a><a href="ch03.html">存储系统</a><a href="ch04.html">指令系统</a><a href="ch05.html">CPU</a><a href="ch06.html">总线</a><a href="ch07.html">I/O</a><a href="practice.html">练习场</a><a href="method.html">备考方法论</a><a href="resources.html">资源导航</a>
+  </div>
+  <button class="theme-btn" title="切换明暗主题">🌙</button>
+</div></nav>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="kicker">CHAPTER 01 · 计算机系统概述</span>
+    <h1>第 1 章 · 先看清整台机器的骨架</h1>
+    <p>组成原理不是“背部件”，而是沿着一条主线往下钻：<b>程序怎样变成指令，指令怎样驱动硬件，硬件又怎样被时间与空间约束</b>。这一章先把整机框架、层次结构和性能语言建立起来，后面六章才有挂靠点。</p>
+    <p class="tagline">预计 2~3 小时 · 1 个交互实验室 · 8 道分级练习 · 408 选择 + 大题都可能涉及</p>
+    <div class="stats">
+      <div class="stat"><b>45</b><span>计组在 408 中约 45 分</span></div>
+      <div class="stat"><b>5</b><span>冯·诺依曼五大部件</span></div>
+      <div class="stat"><b>4</b><span>性能公式必须会</span></div>
+    </div>
+  </div>
+
+  <div class="toc"><span class="toc-label">本页导航</span><a href="#goal">学习目标</a><a href="#s1">冯·诺依曼</a><a href="#s2">指令怎么跑</a><a href="#s3">软件层次</a><a href="#s4">性能指标</a><a href="#lab">实验室</a><a href="#deep">进阶深挖</a><a href="#pit">避坑</a><a href="#quiz">章内练习</a><a href="#ck">打卡</a></div>
+
+  <div class="callout exam" id="goal"><div class="co-title">🎯 学习目标（学完你应该能）</div>
+  ① 说清冯·诺依曼机的“存储程序”到底存什么、按什么顺序执行；<br>
+  ② 画出取指周期的数据流，指出 PC、IR、MAR、MDR 各自的作用；<br>
+  ③ 区分机器字长、指令字长、存储字长，解释三者为什么可以不同；<br>
+  ④ 用“指令数 × CPI × 时钟周期”算 CPU 时间，用主频和 CPI 算 MIPS；<br>
+  ⑤ 解释“主频高不等于性能好”，并说出至少两个原因。</div>
+
+  <h2 class="sec" id="s1">1.1 从“算盘”到“存储程序”</h2>
+  <div class="callout life"><div class="co-title">🍳 生活类比</div>
+  早期的计算工具像<b>厨房里的一整套手动工具</b>：要做什么菜，人得一步一步操作。冯·诺依曼机的想法是：把<b>菜谱（程序）和食材（数据）一起放进机器</b>，机器自己按菜谱顺序取步骤、取食材、开火翻炒——这就是“存储程序”。</div>
+
+  <p>冯·诺依曼在 1945 年提出“存储程序”计算机方案，核心可以压缩成一句话：<b>指令和数据以同等地位存放在同一存储器中，机器按地址访问、按顺序自动执行</b>。它的经典特点有：</p>
+  <div class="steps">
+    <div class="step"><b>五大部件：</b>运算器、控制器、存储器、输入设备、输出设备。运算器 + 控制器 = CPU。</div>
+    <div class="step"><b>二进制：</b>指令和数据都用二进制表示，存储器不区分“这是指令还是数据”，靠 CPU 的取指/执行阶段来区分。</div>
+    <div class="step"><b>存储程序：</b>程序事先存入主存，CPU 自动逐条取指执行，不需要人中途拨开关。</div>
+    <div class="step"><b>指令 = 操作码 + 地址码：</b>操作码说明“做什么”，地址码说明“对谁做”。</div>
+    <div class="step"><b>顺序执行：</b>默认按 PC 递增的顺序执行，遇到转移指令才改变流程。</div>
+    <div class="step"><b>以运算器为中心：</b>这是早期结构，输入/输出数据都要经过运算器，现代计算机已改为<b>以存储器为中心</b>，各部件通过总线交换数据。</div>
+  </div>
+
+  <div class="callout warn"><div class="co-title">⚠️ 最容易混淆的一点</div>
+  “指令和数据同等地位”<b>不等于</b>“CPU 分不清指令和数据”。存储器里确实都存二进制，但 CPU 在取指周期把读出的内容送 IR 当指令译码，在执行周期把读出的内容当操作数使用；<b>阶段决定身份</b>。这也是为什么程序可以被当作数据修改（自修改代码）——但现代系统通常禁止或限制这种做法。</div>
+
+  <h3 class="sub">冯·诺依曼 vs 哈佛结构</h3>
+  <table class="tbl">
+    <tr><th>维度</th><th>冯·诺依曼结构</th><th>哈佛结构</th></tr>
+    <tr><td>存储器</td><td>指令和数据共用一个存储空间</td><td>指令存储器与数据存储器分开</td></tr>
+    <tr><td>总线</td><td>取指和取数可能争用同一总线（结构冒险）</td><td>可同时取指和取数，带宽更高</td></tr>
+    <tr><td>典型场景</td><td>通用计算机主存</td><td>单片机、DSP、CPU 的 L1 指令/数据 Cache</td></tr>
+  </table>
+  <p>现代 CPU 常见的是“<b>混合结构</b>”：主存统一编址（冯·诺依曼），但 L1 Cache 分成 I-Cache 和 D-Cache（哈佛），兼顾灵活性与取指/取数并行。</p>
+
+  <h2 class="sec" id="s2">1.2 一条指令是怎样跑完的</h2>
+  <p>先把 CPU 内部四个关键寄存器记住，后面第 5 章会反复用：</p>
+  <table class="tbl">
+    <tr><th>寄存器</th><th>全称</th><th>作用</th><th>易错点</th></tr>
+    <tr><td><b>PC</b></td><td>程序计数器</td><td>存放下一条要执行的指令地址</td><td>不是“当前指令地址”；取指后通常自动加指令长度</td></tr>
+    <tr><td><b>IR</b></td><td>指令寄存器</td><td>存放当前正在译码/执行的指令</td><td>IR 的内容供译码器使用，不直接参与地址计算</td></tr>
+    <tr><td><b>MAR</b></td><td>存储器地址寄存器</td><td>存放要访问的主存单元地址</td><td>位数决定可寻址空间</td></tr>
+    <tr><td><b>MDR</b></td><td>存储器数据寄存器</td><td>存放从主存读出或要写入主存的数据</td><td>位数通常等于存储字长</td></tr>
+  </table>
+
+  <p>以一条“加法”指令为例，CPU 的典型执行过程是：</p>
+  <div class="steps">
+    <div class="step"><b>取指（IF）：</b>PC → MAR；MAR 送地址到主存；主存读出指令 → MDR → IR；PC 更新为下一条指令地址。</div>
+    <div class="step"><b>译码（ID）：</b>译码器分析 IR 中的操作码，判断这是加法、访存还是转移；同时读出寄存器操作数。</div>
+    <div class="step"><b>取操作数（OF）：</b>若操作数在主存，按寻址方式算出有效地址，访问主存送入 MDR。</div>
+    <div class="step"><b>执行（EX）：</b>ALU 完成运算，结果暂存；若为访存指令，则计算地址或准备写数据。</div>
+    <div class="step"><b>写回（WB）：</b>把结果写回寄存器或主存；若为转移指令，则修改 PC。</div>
+  </div>
+
+  <div class="callout exam"><div class="co-title">📌 408 高频：取指数据流</div>
+  <code class="inline">PC → MAR → 主存 → MDR → IR</code>，同时 <code class="inline">PC + “1” → PC</code>。这里的“1”不是固定 1 个字节，而是<b>一条指令的长度</b>；在按字编址、指令字长为一个字时才是加 1。选择题常把“PC 加 1”写成固定加 1 来设陷阱。</div>
+
+  <p>为什么要把“取指”和“执行”分开？因为它们的访存行为不同：取指访存取的是指令，执行访存取的是数据；分开后控制器可以按周期发出不同的控制信号，也方便引入流水线（第 5 章）。</p>
+
+  <h2 class="sec" id="s3">1.3 软件、硬件与多级层次</h2>
+  <p>计算机系统 = 硬件 + 软件。软件通常分为：</p>
+  <div class="grid cols-2">
+    <div class="card"><h3>系统软件</h3><p>操作系统、编译程序、汇编程序、链接程序、数据库管理系统等。它管理硬件资源，为应用软件提供运行环境。</p></div>
+    <div class="card"><h3>应用软件</h3><p>浏览器、办公软件、游戏、各类业务系统。它面向具体任务，运行在系统软件之上。</p></div>
+  </div>
+  <p>从“机器能直接执行什么”看，又可以把系统分成多级层次：</p>
+  <table class="tbl">
+    <tr><th>层次</th><th>名称</th><th>这一层看到的世界</th><th>由谁实现</th></tr>
+    <tr><td>M4</td><td>高级语言级</td><td>C、Java、Python 等</td><td>编译程序 / 解释程序</td></tr>
+    <tr><td>M3</td><td>汇编语言级</td><td>助记符、标号、伪指令</td><td>汇编程序</td></tr>
+    <tr><td>M2</td><td>操作系统级</td><td>系统调用、进程、文件</td><td>操作系统</td></tr>
+    <tr><td>M1</td><td>传统机器级</td><td>机器指令（ISA）</td><td>硬件 / 微程序</td></tr>
+    <tr><td>M0</td><td>微程序机器级</td><td>微指令、微操作</td><td>硬件</td></tr>
+  </table>
+  <div class="callout cyan"><div class="co-title">🔍 “透明”是什么意思</div>
+  在计算机体系结构中，“透明”指<b>存在但上层看不见</b>。例如微程序对机器语言程序员透明：写机器指令的人不需要知道微指令怎么编。注意不是“不存在”，也不是“看不见所以不重要”。</div>
+
+  <p><b>编译 vs 解释：</b>编译程序把高级语言源程序整体翻译成目标程序，之后可反复执行；解释程序逐条翻译并立即执行，通常不生成独立目标文件。编译执行快、但多一步构建；解释灵活、但运行时开销大。汇编程序则是把汇编语言翻译成机器语言。</p>
+
+  <h2 class="sec" id="s4">1.4 性能指标：别只会背主频</h2>
+  <p>408 常考的性能指标可以分成“时间类”和“吞吐类”：</p>
+  <table class="tbl">
+    <tr><th>指标</th><th>含义</th><th>公式 / 单位</th><th>备注</th></tr>
+    <tr><td><b>机器字长</b></td><td>CPU 一次整数运算能处理的二进制位数</td><td>位（bit）</td><td>通常等于通用寄存器宽度，如 32/64 位</td></tr>
+    <tr><td><b>时钟周期</b></td><td>CPU 主频的倒数</td><td>T = 1 / f</td><td>单位 ns（1 GHz → 1 ns）</td></tr>
+    <tr><td><b>CPI</b></td><td>每条指令平均时钟周期数</td><td>总周期数 / 指令数</td><td>不同指令 CPI 不同，程序混合后取平均</td></tr>
+    <tr><td><b>CPU 时间</b></td><td>程序在 CPU 上执行的时间</td><td>指令数 × CPI × 时钟周期</td><td>也写成 指令数 × CPI / 主频</td></tr>
+    <tr><td><b>MIPS</b></td><td>每秒执行多少百万条指令</td><td>主频(MHz) / CPI</td><td>只适合定点指令，不适合浮点</td></tr>
+    <tr><td><b>MFLOPS</b></td><td>每秒多少百万次浮点运算</td><td>浮点操作数 / (时间 × 10⁶)</td><td>衡量科学计算性能</td></tr>
+    <tr><td><b>吞吐量</b></td><td>单位时间完成的任务数</td><td>任务数 / 时间</td><td>与响应时间不是一回事</td></tr>
+    <tr><td><b>响应时间</b></td><td>完成单个任务所需时间</td><td>秒</td><td>交互体验更关注它</td></tr>
+  </table>
+
+  <div class="formula">
+    <b>CPU 时间</b> = 指令数 × CPI × 时钟周期 = 指令数 × CPI / 主频<br>
+    <b>MIPS</b> = 主频（MHz）/ CPI = 指令数 /（执行时间 × 10⁶）<br>
+    <b>平均 CPI</b> = Σ（第 i 类指令的 CPI × 第 i 类指令所占比例）
+  </div>
+
+  <p><b>例：</b>某 CPU 主频 2 GHz，平均 CPI = 4，程序执行 10⁸ 条指令。则：</p>
+  <pre class="code">时钟周期 = 1 / 2 GHz = 0.5 ns
+CPU 时间 = 10⁸ × 4 × 0.5 ns = 0.2 s
+MIPS     = 2000 MHz / 4 = 500</pre>
+
+  <div class="callout warn"><div class="co-title">⚠️ 主频高 ≠ 性能好</div>
+  ① <b>CPI 不同</b>：A 主频 3 GHz、CPI 6，B 主频 2 GHz、CPI 2；同样 10⁸ 条指令，A 用 0.2 s，B 只用 0.1 s。<br>
+  ② <b>指令集不同</b>：完成同一任务，RISC 可能需要更多条指令，CISC 一条指令做更多事，不能只比主频。<br>
+  ③ <b>程序不同</b>：跑分程序偏向某类指令，不能代表所有负载。<br>
+  ④ <b>存储墙</b>：CPU 很快但主存跟不上，实际性能受 Cache 命中率和内存带宽限制。</div>
+
+  <h3 class="sub">Amdahl 定律：优化一部分，收益有上限</h3>
+  <p>若某部分占总执行时间的比例为 p，把这部分加速 s 倍，则整体加速比为：</p>
+  <div class="formula">加速比 = 1 / ((1 − p) + p / s)</div>
+  <p>例如程序 40% 的时间在乘法上，把乘法加速 4 倍，整体加速比 = 1 / (0.6 + 0.4/4) = 1 / 0.7 ≈ 1.43。剩余 60% 不优化，整体就不可能超过 1/0.6 ≈ 1.67 倍。这也是“木桶效应”的定量版本。</p>
+
+  <h2 class="sec" id="lab">🔬 实验室：性能指标换算器</h2>
+  <p>改主频、CPI、指令数，看 CPU 时间与 MIPS 怎么变。重点观察：主频翻倍但 CPI 也翻倍时，时间不变。</p>
+  <div class="lab" id="lab-perf">
+    <div class="lab-title">⚙️ 性能换算</div>
+    <div class="lab-desc">输入主频（GHz）、平均 CPI、指令数（百万条），点“计算”。</div>
+    <div class="lab-stage">
+      <div class="lab-ctrl">
+        <label class="lab-field">主频 (GHz)<input id="perf-freq" type="number" value="2.0" step="0.1" min="0.1"></label>
+        <label class="lab-field">平均 CPI<input id="perf-cpi" type="number" value="4" step="0.5" min="0.1"></label>
+        <label class="lab-field">指令数 (百万)<input id="perf-inst" type="number" value="1000" step="100" min="1"></label>
+        <button id="perf-go" type="button">计算</button>
+        <button id="perf-reset" class="ghost" type="button">重置</button>
+      </div>
+      <div class="lab-out" id="perf-out"></div>
+      <div class="lab-kv" id="perf-kv"></div>
+    </div>
+    <div class="lab-note" id="perf-note"></div>
+  </div>
+
+  <h2 class="sec" id="deep">🚀 进阶深挖（教材级）</h2>
+  <h3 class="sub">深挖 1 · 冯·诺依曼瓶颈与存储层次</h3>
+  <p>CPU 与主存之间只有一条（或有限几条）通路，而 CPU 的速度增长远快于 DRAM，导致“CPU 等数据”。解决思路有两条：一是用 <b>Cache—主存—辅存</b> 的存储层次，把常用数据放在离 CPU 更近的地方；二是用多体交叉、宽总线提高主存带宽。第 3 章会展开。</p>
+
+  <h3 class="sub">深挖 2 · CPI 的分解与“指令混合”</h3>
+  <p>程序的平均 CPI 不是某一类指令的 CPI，而是按指令比例加权：</p>
+  <div class="formula">CPI<sub>平均</sub> = Σ (CPI<sub>i</sub> × f<sub>i</sub>)，其中 Σ f<sub>i</sub> = 1</div>
+  <p>例如 load 占 30%、CPI=4；运算指令占 50%、CPI=1；分支占 20%、CPI=2，则平均 CPI = 0.3×4 + 0.5×1 + 0.2×2 = 2.1。编译器优化、指令集设计都会改变 f<sub>i</sub>，所以“换编译器”也可能带来性能差异。</p>
+
+  <h3 class="sub">深挖 3 · 性能评价：基准程序与几何平均</h3>
+  <p>用一两个小程序测性能容易被“针对优化”。常见做法是跑一组基准程序（如 SPEC），再对多个程序的加速比取<b>几何平均</b>：</p>
+  <div class="formula">几何平均 = (∏ 加速比<sub>i</sub>)<sup>1/n</sup></div>
+  <p>几何平均对“比例变化”更公平；算术平均会被某个特别大的值拉偏。408 一般只考概念，不要求复杂计算。</p>
+
+  <div class="callout views"><div class="co-title">🌐 多源视角</div>
+  <ul>
+    <li><b>【唐朔飞《计算机组成原理》】</b>把机器分为“微程序机器级—传统机器级—操作系统级—汇编语言级—高级语言级”，强调<b>每一级都向上一级提供接口</b>。本站用法：看到“透明”先问“对哪一级透明”。</li>
+    <li><b>【CSAPP】</b>用“程序员视角”讲机器：程序从源文件到可执行文件，要经过预处理、编译、汇编、链接。本站用法：把“编译”与“汇编”分清，选择题常混。</li>
+    <li><b>【Patterson & Hennessy】</b>用“性能 = 1 / 执行时间”统一度量，并把 CPU 时间拆成指令数、CPI、时钟周期三个因子。本站用法：任何性能题先写出这三个因子，再找题目给了哪两个。</li>
+  </ul>
+  <div class="src">参考：唐朔飞《计算机组成原理》（第 3 版）第 1 章；CSAPP 第 1、7 章；Patterson & Hennessy《Computer Organization and Design》第 1 章。</div></div>
+
+  <h2 class="sec" id="pit">⚠️ 本章避坑清单</h2>
+  <div class="steps">
+    <div class="step">“存储程序”指程序和数据一起存在<b>同一主存</b>，不是“程序存在硬盘上”。硬盘上的程序要先装入主存才能执行。</div>
+    <div class="step">PC 存的是<b>下一条指令地址</b>；取指后加的是“指令长度”，不是无脑加 1。</div>
+    <div class="step">机器字长 ≠ 指令字长 ≠ 存储字长。三者可以不同，题目给“某机字长 32 位”通常指机器字长。</div>
+    <div class="step">MIPS 只反映定点指令吞吐，不能拿来比较浮点性能；浮点看 MFLOPS。</div>
+    <div class="step">“主频高一定快”是错的；要结合 CPI、指令数、存储层次和程序负载。</div>
+    <div class="step">编译程序生成目标代码，解释程序通常不生成独立目标代码；不要把“解释”说成“编译后执行”。</div>
+  </div>
+
+  <h2 class="sec" id="quiz">📝 章内练习（<span data-quiz-count>8</span> 题 · 基础 → 提高 → 真题改编）</h2>
+  <p class="muted">先自己选，再提交看解析。答错会自动进错题本，可在页面上方状态栏点“只看错题”重做。</p>
+  <div data-quiz-ch="1"></div>
+
+  <h2 class="sec" id="ck">✅ 本章打卡</h2>
+  <div data-ck-scope>
+    <p><span class="progress-pill">0 / 5 已打卡</span></p>
+    <div class="checklist">
+      <label class="check-item" data-ck="c1-1"><input type="checkbox"><span>能不看书画出冯·诺依曼五大部件，并说出“存储程序”的含义</span></label>
+      <label class="check-item" data-ck="c1-2"><input type="checkbox"><span>能写出取指数据流 PC → MAR → 主存 → MDR → IR，并解释 PC 为什么加指令长度</span></label>
+      <label class="check-item" data-ck="c1-3"><input type="checkbox"><span>能区分机器字长、指令字长、存储字长，各举一个例子</span></label>
+      <label class="check-item" data-ck="c1-4"><input type="checkbox"><span>能独立算出 CPU 时间、MIPS、平均 CPI，并说明主频高不一定快</span></label>
+      <label class="check-item" data-ck="c1-5"><input type="checkbox"><span>能用一句话解释冯·诺依曼瓶颈，并说出 Cache 的作用</span></label>
+    </div>
+  </div>
+
+  <div class="callout ok"><div class="co-title">✅ 下一章预告</div>
+  下一章进入“数据表示”：同样 8 个二进制位，为什么既能表示 255，又能表示 −1？补码、IEEE 754、海明码会把“二进制如何承载信息”讲透。</div>
+</div>
+
+<footer>
+  408 计算机组成原理可视化课堂 · 基础教学 + 交互实验室 + 分级题库<br>
+  <div class="pagers"><a href="index.html">← 返回总览</a><a href="ch02.html">第 2 章 数据表示 →</a><a href="practice.html">去练习场 →</a></div>
+</footer>
+<script src="assets/questions.js?v=1"></script>
+<script src="assets/app.js?v=1"></script>
+<script src="assets/labs.js?v=1"></script>
+</body>
+</html>
