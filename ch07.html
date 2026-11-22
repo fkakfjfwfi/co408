@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>第 7 章 输入/输出系统 · 408 计算机组成原理可视化课堂</title>
 <meta name="description" content="408 计算机组成原理第 7 章：I/O 接口、程序查询、中断处理、中断嵌套、DMA 三种方式、通道与 I/O 处理机，附中断/DMA 流程演示。">
-<link rel="stylesheet" href="assets/style.css?v=1">
+<link rel="stylesheet" href="assets/style.css?v=2">
 </head>
 <body>
 <nav class="topbar"><div class="topbar-inner">
@@ -54,6 +54,10 @@
     <tr><td>中断/DMA 支持</td><td>产生中断请求或 DMA 请求</td></tr>
   </table>
 
+  <figure class="vis" data-vis="io-interface">
+    <figcaption>图 7-1 · I/O 接口：CPU 只看到数据/状态/控制三个寄存器，由接口去适配外设</figcaption>
+  </figure>
+
   <h3 class="sub">接口内部结构与端口</h3>
   <p>典型接口包含：<b>数据寄存器</b>（数据端口）、<b>状态寄存器</b>（状态端口）、<b>控制寄存器</b>（控制端口）、地址译码逻辑、控制逻辑。CPU 通过不同的端口地址访问它们。</p>
   <table class="tbl">
@@ -70,6 +74,11 @@
     <div class="step"><b>传送：</b>就绪后，CPU 从数据寄存器读数或写数据。</div>
     <div class="step"><b>循环：</b>处理下一个数据/设备。</div>
   </div>
+
+  <figure class="vis" data-vis="program-query">
+    <figcaption>图 7-2 · 程序查询：CPU 在“读状态—就绪？”之间转圈，没就绪就只能干等</figcaption>
+  </figure>
+
   <p><b>优点：</b>硬件简单、程序直观，不需要中断/DMA 控制器。<br>
   <b>缺点：</b>CPU 与外设串行工作，设备慢时 CPU 大量时间在忙等；多个设备时更糟。适合设备速度较快、CPU 任务不重或嵌入式简单场景。</p>
 
@@ -93,6 +102,11 @@
     <div class="step"><b>取中断向量：</b>按类型号查中断向量表，得到服务程序入口地址。</div>
     <div class="step"><b>转服务程序：</b>把入口地址送 PC，开始执行中断服务程序。</div>
   </div>
+
+  <figure class="vis" data-vis="interrupt-flow">
+    <figcaption>图 7-3 · 中断响应：设备举手 → CPU 完成当前指令 → 保存断点 → 取向量 → 服务返回</figcaption>
+  </figure>
+
   <div class="callout warn"><div class="co-title">⚠️ 中断隐指令不是“一条指令”</div>
   它没有操作码，不占指令系统的一条指令，而是 CPU 在中断响应周期由硬件自动完成的操作序列。不同教材对“保存 PSW”归属（隐指令 vs 服务程序）有差异，答题时按题目教材口径，核心是“关中断、保存断点、识别中断源”。</div>
 
@@ -122,6 +136,10 @@
     <div class="step"><b>传输：</b>CPU 让出总线（或周期挪用），DMA 控制器直接读写主存，地址/计数自动更新。</div>
     <div class="step"><b>完成：</b>计数到 0，DMA 控制器发中断，CPU 做校验、切换缓冲区等收尾。</div>
   </div>
+
+  <figure class="vis" data-vis="dma-flow">
+    <figcaption>图 7-4 · DMA：CPU 只负责开头初始化、结尾收尾，中间整块数据由 DMA 控制器直接搬</figcaption>
+  </figure>
 
   <h3 class="sub">DMA 的三种传送方式</h3>
   <table class="tbl">
@@ -224,6 +242,7 @@
 </footer>
 <script src="assets/questions.js?v=1"></script>
 <script src="assets/app.js?v=1"></script>
+<script src="assets/visuals.js?v=1"></script>
 <script src="assets/labs.js?v=1"></script>
 </body>
 </html>
