@@ -439,6 +439,18 @@ figure.vis figcaption {
 .v-grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 3; }
 .v-arc { stroke: var(--accent); stroke-width: 3; }
 
+/* ── 单总线数据通路 ── */
+#dp-stage svg { display: block; width: 100%; min-width: 680px; height: auto; }
+.dp-box rect { fill: var(--card-2); stroke: var(--line); stroke-width: 1.5; }
+.dp-box .dp-title { font-size: 14px; font-weight: 800; fill: var(--ink); text-anchor: middle; }
+.dp-box .dp-sub { font-size: 11.5px; fill: var(--ink-3); text-anchor: middle; }
+.dp-box.dp-active rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 3; }
+.dp-box.dp-active .dp-title { fill: var(--accent); }
+.dp-bus { stroke: var(--ink-3); stroke-width: 3; }
+.dp-bus-hot { stroke: var(--accent); stroke-width: 4; }
+.dp-conn { stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.dp-buslabel { font-size: 11.5px; fill: var(--ink-3); text-anchor: middle; }
+
 /* ── 资源页 ── */
 .res-item { display: flex; gap: 14px; padding: 15px 0; border-bottom: 1px dashed var(--line); }
 .res-item:last-child { border-bottom: none; }
