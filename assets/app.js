@@ -215,6 +215,10 @@
 
   function showList(list) {
     quizzes.forEach(function (q) { q.style.display = list.indexOf(q) >= 0 ? "" : "none"; });
+    var countEl = document.querySelector("[data-filter-count]");
+    if (countEl) countEl.textContent = "当前显示 " + list.length + " / " + quizzes.length + " 题";
+    var empty = document.querySelector("[data-filter-empty]");
+    if (empty) empty.style.display = list.length ? "none" : "";
   }
   function applyFilter() {
     var list = quizzes.filter(function (q) {
@@ -223,10 +227,6 @@
       return (!filterCh || ch === filterCh) && (!filterLevel || lvl === filterLevel);
     });
     showList(list);
-    var countEl = document.querySelector("[data-filter-count]");
-    if (countEl) countEl.textContent = "当前显示 " + list.length + " / " + quizzes.length + " 题";
-    var empty = document.querySelector("[data-filter-empty]");
-    if (empty) empty.style.display = list.length ? "none" : "";
     refreshHud();
   }
   function applyMode(mode) {
