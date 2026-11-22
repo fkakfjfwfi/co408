@@ -21,7 +21,7 @@
     <span class="kicker">CHAPTER 05 · 中央处理器</span>
     <h1>第 5 章 · 指令在这里变成电信号</h1>
     <p>CPU 是计组的“心脏”：<b>取指、译码、执行、访存、写回</b>，每一步都要有数据通路和控制信号配合。这一章的重点不是背框图，而是能沿着一条指令走完整个数据通路，并能画流水线时空图。</p>
-    <p class="tagline">预计 5~6 小时 · 1 个流水线实验室 · 10 道分级练习 · 大题高频</p>
+    <p class="tagline">预计 5~6 小时 · 2 个交互实验室 · 10 道分级练习 · 大题高频</p>
     <div class="stats">
       <div class="stat"><b>4</b><span>指令周期阶段</span></div>
       <div class="stat"><b>5</b><span>经典流水线段数</span></div>
@@ -105,6 +105,20 @@ PC + 1 → PC
 R1 → A          // 操作数 1 送 ALU 的 A 端
 R2 → B          // 操作数 2 送 ALU 的 B 端
 A + B → R1      // ALU 结果写回 R1</pre>
+
+  <div class="lab" id="lab-datapath">
+    <div class="lab-title">🔬 实验室 2 · 单总线数据通路步进</div>
+    <div class="lab-desc">以 <code class="inline">ADD R1, R2</code> 为例，点“下一步”看每一步是哪两个部件在使用总线；高亮的就是当前传送的两端。</div>
+    <div class="lab-stage"><div id="dp-stage"></div></div>
+    <div class="lab-ctrl">
+      <button id="dp-prev" class="ghost" type="button">上一步</button>
+      <button id="dp-next" type="button">下一步</button>
+      <button id="dp-auto" class="ghost" type="button">自动播放</button>
+      <button id="dp-reset" class="ghost" type="button">重置</button>
+    </div>
+    <div class="lab-note" id="dp-note"></div>
+  </div>
+
   <p>每一步都需要控制器发出对应的控制信号（如 <code class="inline">PCout、MARin、MemR、MDRout、IRin</code>）。数据通路大题常要求你写出微操作序列并标注控制信号，答题时按“取指—取数—运算—写回”分段，不要漏掉 PC 更新。</p>
 
   <h3 class="sub">取指阶段的统一性</h3>
@@ -275,6 +289,6 @@ T6: ALUadd, R1in</pre>
 <script src="assets/questions.js?v=1"></script>
 <script src="assets/app.js?v=1"></script>
 <script src="assets/visuals.js?v=1"></script>
-<script src="assets/labs.js?v=1"></script>
+<script src="assets/labs.js?v=2"></script>
 </body>
 </html>
