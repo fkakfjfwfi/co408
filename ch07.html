@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 7 章 输入/输出系统 · 408 计算机组成原理可视化课堂</title>
+<meta name="description" content="408 计算机组成原理第 7 章：I/O 接口、程序查询、中断处理、中断嵌套、DMA 三种方式、通道与 I/O 处理机，附中断/DMA 流程演示。">
+<link rel="stylesheet" href="assets/style.css?v=1">
+</head>
+<body>
+<nav class="topbar"><div class="topbar-inner">
+  <a class="logo" href="index.html"><span class="dot"></span>408 计组可视化课堂</a>
+  <div class="nav-links">
+    <a href="index.html">总览</a><a href="ch01.html">系统概述</a><a href="ch02.html">数据表示</a><a href="ch03.html">存储系统</a><a href="ch04.html">指令系统</a><a href="ch05.html">CPU</a><a href="ch06.html">总线</a><a href="ch07.html">I/O</a><a href="practice.html">练习场</a><a href="method.html">备考方法论</a><a href="resources.html">资源导航</a>
+  </div>
+  <button class="theme-btn" title="切换明暗主题">🌙</button>
+</div></nav>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="kicker">CHAPTER 07 · 输入/输出系统</span>
+    <h1>第 7 章 · CPU 不可能一直等设备</h1>
+    <p>I/O 系统的核心矛盾是<b>速度差</b>：CPU 纳秒级，外设毫秒级。程序查询让 CPU 干等，中断让设备主动通知，DMA 让控制器接管数据块——这一章就是一条“把 CPU 解放出来”的演进路线。</p>
+    <p class="tagline">预计 3~4 小时 · 1 个流程演示 · 10 道分级练习 · 中断/DMA 高频</p>
+    <div class="stats">
+      <div class="stat"><b>3</b><span>I/O 控制方式</span></div>
+      <div class="stat"><b>5</b><span>中断响应步骤</span></div>
+      <div class="stat"><b>3</b><span>DMA 传送方式</span></div>
+    </div>
+  </div>
+
+  <div class="toc"><span class="toc-label">本页导航</span><a href="#goal">学习目标</a><a href="#s1">I/O 接口</a><a href="#s2">程序查询</a><a href="#s3">中断</a><a href="#s4">DMA</a><a href="#lab">流程演示</a><a href="#s5">通道与磁盘</a><a href="#deep">进阶</a><a href="#pit">避坑</a><a href="#quiz">练习</a><a href="#ck">打卡</a></div>
+
+  <div class="callout exam" id="goal"><div class="co-title">🎯 学习目标（学完你应该能）</div>
+  ① 说出 I/O 接口的五个基本功能，区分统一编址与独立编址；<br>
+  ② 画出程序查询流程，说明 CPU 忙等的代价；<br>
+  ③ 完整背出中断响应过程，区分中断隐指令和服务程序；<br>
+  ④ 解释中断嵌套、屏蔽字、中断向量的作用；<br>
+  ⑤ 比较 DMA 的三种传送方式，说清 DMA 与中断的区别；<br>
+  ⑥ 说出通道/I/O 处理机为什么能进一步解放 CPU。</div>
+
+  <h2 class="sec" id="s1">7.1 I/O 接口：CPU 与外设之间的“翻译 + 缓冲”</h2>
+  <div class="callout life"><div class="co-title">🌉 生活类比</div>
+  I/O 接口像<b>海关</b>：一边是 CPU（快、规则统一），一边是各种外设（慢、格式各异）。海关负责排队缓冲、检查证件（状态）、翻译格式、决定放行（控制），让两边不必直接适配。</div>
+
+  <p>外设为什么不能直接接 CPU？因为存在四类差异：<b>速度差异、数据格式差异、时序差异、电气特性差异</b>。I/O 接口负责弥合这些差异。</p>
+  <table class="tbl">
+    <tr><th>功能</th><th>说明</th></tr>
+    <tr><td>数据缓冲</td><td>用数据寄存器暂存，解决 CPU 与外设速度不匹配</td></tr>
+    <tr><td>速度匹配/时序控制</td><td>按外设时序控制数据传送</td></tr>
+    <tr><td>格式转换</td><td>串/并转换、电平转换、字节/字组装</td></tr>
+    <tr><td>状态检测与控制</td><td>提供状态寄存器（就绪/忙/错误）和控制寄存器（启动/命令）</td></tr>
+    <tr><td>地址译码与设备选择</td><td>根据地址选中相应端口</td></tr>
+    <tr><td>中断/DMA 支持</td><td>产生中断请求或 DMA 请求</td></tr>
+  </table>
+
+  <h3 class="sub">接口内部结构与端口</h3>
+  <p>典型接口包含：<b>数据寄存器</b>（数据端口）、<b>状态寄存器</b>（状态端口）、<b>控制寄存器</b>（控制端口）、地址译码逻辑、控制逻辑。CPU 通过不同的端口地址访问它们。</p>
+  <table class="tbl">
+    <tr><th>编址方式</th><th>做法</th><th>优点</th><th>缺点</th></tr>
+    <tr><td>统一编址（存储器映射 I/O）</td><td>端口与主存共用地址空间</td><td>可用普通 load/store 指令，编程灵活</td><td>占用主存地址空间；译码较复杂</td></tr>
+    <tr><td>独立编址（I/O 映射）</td><td>端口有独立地址空间，用专用 I/O 指令</td><td>不占主存空间；I/O 指令短</td><td>需要专用指令；编程不如统一编址灵活</td></tr>
+  </table>
+
+  <h2 class="sec" id="s2">7.2 程序查询：最简单的“干等”</h2>
+  <div class="steps">
+    <div class="step"><b>启动设备：</b>CPU 向控制寄存器写命令，启动外设。</div>
+    <div class="step"><b>读状态：</b>CPU 反复读取状态寄存器，检查“就绪/完成”位。</div>
+    <div class="step"><b>忙等：</b>若未就绪，继续读状态，CPU 不能做别的事。</div>
+    <div class="step"><b>传送：</b>就绪后，CPU 从数据寄存器读数或写数据。</div>
+    <div class="step"><b>循环：</b>处理下一个数据/设备。</div>
+  </div>
+  <p><b>优点：</b>硬件简单、程序直观，不需要中断/DMA 控制器。<br>
+  <b>缺点：</b>CPU 与外设串行工作，设备慢时 CPU 大量时间在忙等；多个设备时更糟。适合设备速度较快、CPU 任务不重或嵌入式简单场景。</p>
+
+  <h2 class="sec" id="s3">7.3 中断：让设备主动“举手”</h2>
+  <p>中断让外设在准备好时主动通知 CPU，CPU 不必轮询。一次完整的中断过程包括：<b>中断请求 → 中断判优 → 中断响应 → 中断服务 → 中断返回</b>。</p>
+
+  <h3 class="sub">中断的分类</h3>
+  <table class="tbl">
+    <tr><th>分类</th><th>来源</th><th>例子</th><th>特点</th></tr>
+    <tr><td>外中断（可屏蔽）</td><td>外部设备</td><td>键盘、网卡、磁盘</td><td>可通过中断允许位屏蔽</td></tr>
+    <tr><td>外中断（不可屏蔽）</td><td>外部紧急事件</td><td>电源故障、复位</td><td>不受中断允许位控制</td></tr>
+    <tr><td>内中断（异常）</td><td>CPU 内部</td><td>除零、缺页、非法指令、断点</td><td>与当前指令相关</td></tr>
+    <tr><td>软件中断</td><td>指令</td><td><code class="inline">int n</code>、系统调用</td><td>程序主动触发</td></tr>
+  </table>
+
+  <h3 class="sub">中断响应：硬件自动完成的“隐指令”</h3>
+  <div class="steps">
+    <div class="step"><b>关中断：</b>清除中断允许触发器，防止响应过程被新中断打断。</div>
+    <div class="step"><b>保存断点：</b>把当前 PC（下一条指令地址）和 PSW 保存到栈或指定单元。</div>
+    <div class="step"><b>识别中断源：</b>通过中断判优/编码确定是哪个设备，取得中断类型号。</div>
+    <div class="step"><b>取中断向量：</b>按类型号查中断向量表，得到服务程序入口地址。</div>
+    <div class="step"><b>转服务程序：</b>把入口地址送 PC，开始执行中断服务程序。</div>
+  </div>
+  <div class="callout warn"><div class="co-title">⚠️ 中断隐指令不是“一条指令”</div>
+  它没有操作码，不占指令系统的一条指令，而是 CPU 在中断响应周期由硬件自动完成的操作序列。不同教材对“保存 PSW”归属（隐指令 vs 服务程序）有差异，答题时按题目教材口径，核心是“关中断、保存断点、识别中断源”。</div>
+
+  <h3 class="sub">中断判优与中断嵌套</h3>
+  <p><b>判优：</b>多个中断源同时请求时，按优先级决定先响应谁。可用硬件排队器（如链式、独立请求）或软件查询顺序实现。</p>
+  <p><b>中断嵌套：</b>高优先级中断可以打断正在执行的低优先级服务程序。是否允许嵌套由<b>屏蔽字</b>控制：每个中断源有一个屏蔽字，服务程序设置它，屏蔽本级及更低优先级，开放更高优先级。单重中断则在整个服务程序期间关中断，不允许嵌套。</p>
+  <p><b>中断向量表：</b>存放各中断类型对应的服务程序入口地址（及 PSW）。CPU 用中断类型号作为索引查表，不需要为每个设备写死入口。</p>
+
+  <h2 class="sec" id="s4">7.4 DMA：让控制器直接搬数据</h2>
+  <p>中断方式下，每传一个数据（或一小批）CPU 都要停下当前工作去处理，高速块设备仍然吃不消。DMA（Direct Memory Access）让 DMA 控制器直接在主存与外设之间搬运数据块，CPU 只在开始和结束时参与。</p>
+
+  <h3 class="sub">DMA 控制器的组成</h3>
+  <table class="tbl">
+    <tr><th>部件</th><th>作用</th></tr>
+    <tr><td>主存地址寄存器</td><td>存放当前要访问的主存地址，每传一个字自动加/减</td></tr>
+    <tr><td>字计数器</td><td>记录剩余传送字数，减到 0 表示完成</td></tr>
+    <tr><td>数据缓冲寄存器</td><td>暂存传送的数据</td></tr>
+    <tr><td>控制/状态逻辑</td><td>产生 DMA 请求、总线请求，接收命令和状态</td></tr>
+    <tr><td>中断机构</td><td>传送完成后向 CPU 发中断</td></tr>
+  </table>
+
+  <h3 class="sub">DMA 传送过程</h3>
+  <div class="steps">
+    <div class="step"><b>初始化：</b>CPU 设置 DMA 控制器的源地址、目的地址、传送长度、方向。</div>
+    <div class="step"><b>设备请求：</b>外设准备好后向 DMA 控制器发 DREQ。</div>
+    <div class="step"><b>总线请求：</b>DMA 控制器向 CPU 发 HRQ，申请总线使用权。</div>
+    <div class="step"><b>传输：</b>CPU 让出总线（或周期挪用），DMA 控制器直接读写主存，地址/计数自动更新。</div>
+    <div class="step"><b>完成：</b>计数到 0，DMA 控制器发中断，CPU 做校验、切换缓冲区等收尾。</div>
+  </div>
+
+  <h3 class="sub">DMA 的三种传送方式</h3>
+  <table class="tbl">
+    <tr><th>方式</th><th>做法</th><th>优点</th><th>缺点</th></tr>
+    <tr><td>停止 CPU 访存</td><td>DMA 独占总线，CPU 停止访存</td><td>控制简单，传送快</td><td>CPU 可能长时间不能访存</td></tr>
+    <tr><td>周期挪用（周期窃取）</td><td>DMA 趁 CPU 不访存的周期占用总线</td><td>CPU 只被少量减速</td><td>控制较复杂，可能争用</td></tr>
+    <tr><td>DMA 与 CPU 交替访问</td><td>按时间片交替使用总线</td><td>两者都有机会，较平衡</td><td>需要时间片控制，效率受限制</td></tr>
+  </table>
+
+  <h3 class="sub">DMA vs 中断</h3>
+  <table class="tbl">
+    <tr><th>维度</th><th>中断方式</th><th>DMA 方式</th></tr>
+    <tr><td>触发者</td><td>设备发中断请求给 CPU</td><td>设备发 DMA 请求给 DMA 控制器</td></tr>
+    <tr><td>数据传送</td><td>CPU 执行服务程序逐字/逐块传送</td><td>DMA 控制器直接传送，CPU 不介入</td></tr>
+    <tr><td>CPU 开销</td><td>每个数据/事件都要中断</td><td>只在初始化和结束时参与</td></tr>
+    <tr><td>适用</td><td>中低速、随机事件</td><td>高速块设备（磁盘、网卡）</td></tr>
+    <tr><td>优先级</td><td>由中断优先级决定</td><td>DMA 请求通常优先于 CPU 访存</td></tr>
+  </table>
+
+  <div class="lab" id="lab-io">
+    <div class="lab-title">🔬 演示 · 中断 / DMA 流程</div>
+    <div class="lab-desc">切换“中断方式 / DMA 方式”，点“下一步”逐步看谁在做什么；也可以自动播放。</div>
+    <div class="lab-stage">
+      <div class="flow" id="io-flow"></div>
+      <div class="lab-kv" id="io-desc"></div>
+    </div>
+    <div class="lab-ctrl">
+      <label class="lab-field">方式<select id="io-mode"><option value="int">中断方式</option><option value="dma">DMA 方式</option></select></label>
+      <button id="io-prev" class="ghost" type="button">上一步</button>
+      <button id="io-next" type="button">下一步</button>
+      <button id="io-auto" class="ghost" type="button">自动播放</button>
+      <button id="io-reset" class="ghost" type="button">重置</button>
+    </div>
+  </div>
+
+  <h2 class="sec" id="s5">7.5 通道、I/O 处理机与磁盘</h2>
+  <p><b>通道（channel）</b>是专门负责 I/O 的处理器，能执行通道程序，控制多台设备与主存之间的数据传送。CPU 只需发一条 I/O 指令启动通道，通道完成后中断 CPU。它进一步减少了 CPU 对 I/O 的干预。</p>
+  <p><b>I/O 处理机</b>比通道更独立，有自己的指令系统和存储器，可以执行更复杂的 I/O 程序，CPU 几乎不参与。</p>
+  <table class="tbl">
+    <tr><th>方式</th><th>CPU 参与程度</th><th>数据传送单位</th><th>典型场景</th></tr>
+    <tr><td>程序查询</td><td>全程忙等</td><td>字/字节</td><td>简单嵌入式</td></tr>
+    <tr><td>中断</td><td>每个事件/数据</td><td>字/字节</td><td>键盘、鼠标、中低速设备</td></tr>
+    <tr><td>DMA</td><td>初始化 + 结束</td><td>数据块</td><td>磁盘、网卡</td></tr>
+    <tr><td>通道/I/O 处理机</td><td>启动 + 结束</td><td>一组数据块</td><td>大型机、服务器存储</td></tr>
+  </table>
+
+  <h3 class="sub">磁盘与 RAID（速览）</h3>
+  <p>磁盘是典型的块设备：<b>寻道时间 + 旋转延迟 + 传输时间</b>构成存取时间。磁盘调度算法（FCFS、SSTF、SCAN、C-SCAN）主要用于减少寻道，属于操作系统 I/O 管理的内容，408 计组可能只考基本概念。</p>
+  <p><b>RAID：</b>RAID 0 条带化（性能高、无冗余）；RAID 1 镜像（可靠性高、容量利用率 50%）；RAID 5 分布式奇偶校验（兼顾容量与可靠性，允许 1 盘故障）；RAID 10 先镜像再条带（性能与可靠性兼顾，成本高）。</p>
+
+  <h2 class="sec" id="deep">🚀 进阶深挖（教材级）</h2>
+  <h3 class="sub">深挖 1 · 中断响应为什么必须在指令结束时</h3>
+  <p>若在一条指令执行中间响应中断，指令的中间状态（已修改的寄存器、未写完的存储器）难以保存和恢复，会破坏程序语义。因此 CPU 通常在当前指令执行完后检查中断请求；但某些异常（如缺页）是在指令执行过程中产生的，需要精确记录故障指令地址，处理完后重新执行该指令。</p>
+
+  <h3 class="sub">深挖 2 · 中断屏蔽字怎么设</h3>
+  <p>设系统有 4 个中断源，优先级 A &gt; B &gt; C &gt; D。当 CPU 正在服务 B 时，若要允许 A 嵌套、屏蔽 B/C/D，则 B 的屏蔽字应设为：A 位 0（开放），B/C/D 位 1（屏蔽）。屏蔽字通常按“1 表示屏蔽、0 表示开放”设计，具体看题目约定，答题时先写清约定。</p>
+
+  <h3 class="sub">深挖 3 · DMA 与 Cache 一致性</h3>
+  <p>DMA 直接写主存时，Cache 中可能还保留旧数据，导致 CPU 读到旧值。解决方法有：DMA 写主存时让 Cache 中对应块失效（invalidate），或采用一致性协议/非缓存区域。408 可能以“DMA 是否需要考虑 Cache 一致性”形式出现，答“需要，需失效或更新对应 Cache 块”。</p>
+
+  <div class="callout views"><div class="co-title">🌐 多源视角</div>
+  <ul>
+    <li><b>【唐朔飞】</b>把 I/O 方式按“CPU 干预程度”排序：程序查询 → 中断 → DMA → 通道 → I/O 处理机。本站用法：比较题先按这条演进线定位。</li>
+    <li><b>【CSAPP】</b>用“轮询、中断、DMA”讲设备交互，强调中断开销和 DMA 的块传输。本站用法：看到“高速块设备”优先想 DMA。</li>
+    <li><b>【操作系统】</b>关注中断处理程序、驱动程序、磁盘调度。本站用法：计组问“硬件流程”，OS 问“软件策略”，不要混答。</li>
+  </ul>
+  <div class="src">参考：唐朔飞《计算机组成原理》第 11 章；CSAPP 第 10 章；王道《计算机组成原理复习指导》第 7 章。</div></div>
+
+  <h2 class="sec" id="pit">⚠️ 本章避坑清单</h2>
+  <div class="steps">
+    <div class="step">中断隐指令是硬件自动完成的操作序列，不是指令系统中的一条指令。</div>
+    <div class="step">中断响应第一步是关中断，然后保存断点/PSW、识别中断源；不要先执行服务程序。</div>
+    <div class="step">中断向量是服务程序入口地址（或入口相关信息），不是中断请求信号，也不是优先级。</div>
+    <div class="step">中断嵌套由屏蔽字控制，高优先级可打断低优先级；低优先级不能打断高优先级。</div>
+    <div class="step">DMA 请求的是总线使用权，中断请求的是 CPU 处理；两者触发对象不同。</div>
+    <div class="step">DMA 传输结束时仍可能发中断，不是“完全不用中断”。</div>
+    <div class="step">周期挪用是“偷”CPU 不访存的周期，不是让 CPU 完全停机；停止 CPU 访存才是独占总线。</div>
+  </div>
+
+  <h2 class="sec" id="quiz">📝 章内练习（<span data-quiz-count>10</span> 题 · 基础 → 提高 → 真题改编）</h2>
+  <p class="muted">中断流程、DMA 方式、I/O 编址是重点。</p>
+  <div data-quiz-ch="7"></div>
+
+  <h2 class="sec" id="ck">✅ 本章打卡</h2>
+  <div data-ck-scope>
+    <p><span class="progress-pill">0 / 5 已打卡</span></p>
+    <div class="checklist">
+      <label class="check-item" data-ck="c7-1"><input type="checkbox"><span>能说出 I/O 接口的五个功能，区分统一编址与独立编址</span></label>
+      <label class="check-item" data-ck="c7-2"><input type="checkbox"><span>能画出程序查询流程，说出它为什么浪费 CPU</span></label>
+      <label class="check-item" data-ck="c7-3"><input type="checkbox"><span>能完整背出中断响应五步，区分隐指令与服务程序</span></label>
+      <label class="check-item" data-ck="c7-4"><input type="checkbox"><span>能解释中断嵌套与屏蔽字，给定优先级会设屏蔽字</span></label>
+      <label class="check-item" data-ck="c7-5"><input type="checkbox"><span>能比较 DMA 三种方式，列出 DMA 与中断的五点区别</span></label>
+    </div>
+  </div>
+</div>
+
+<footer>
+  408 计算机组成原理可视化课堂 · 基础教学 + 交互实验室 + 分级题库<br>
+  <div class="pagers"><a href="ch06.html">← 第 6 章 总线</a><a href="practice.html">去练习场 →</a><a href="method.html">备考方法论 →</a></div>
+</footer>
+<script src="assets/questions.js?v=1"></script>
+<script src="assets/app.js?v=1"></script>
+<script src="assets/labs.js?v=1"></script>
+</body>
+</html>
