@@ -410,6 +410,35 @@ table.tbl .hot-row td { background: var(--accent-soft) !important; font-weight: 
 .flow-arrow { display: flex; align-items: center; color: var(--ink-3); font-size: 16px; }
 @media (max-width: 720px) { .flow-arrow { display: none; } }
 
+/* ── 教学图解 ── */
+figure.vis {
+  margin: 20px 0; padding: 14px 14px 10px;
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 16px; box-shadow: var(--shadow);
+  overflow-x: auto;
+}
+figure.vis svg { display: block; width: 100%; min-width: 680px; height: auto; }
+figure.vis figcaption {
+  margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line);
+  font-size: 12.5px; color: var(--ink-3); text-align: center;
+}
+.v-box { fill: var(--brand-soft); stroke: var(--brand); stroke-width: 1.4; }
+.v-box.alt { fill: var(--accent-soft); stroke: var(--accent); }
+.v-box.gray { fill: var(--card-2); stroke: var(--line); }
+.v-box.green { fill: var(--green-soft); stroke: var(--green); }
+.v-box.purple { fill: var(--purple-soft); stroke: var(--purple); }
+.v-box.red { fill: var(--red-soft); stroke: var(--red); }
+.v-title { font-size: 13.5px; font-weight: 800; fill: var(--ink); font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
+.v-sub { font-size: 12px; fill: var(--ink-2); font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
+.v-label { font-size: 12px; fill: var(--ink-3); font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
+.v-tiny { font-size: 9.5px; fill: var(--ink-2); font-family: var(--mono); }
+.v-code { font-size: 15px; fill: var(--ink-2); font-family: var(--mono); letter-spacing: 1px; }
+.v-line { stroke: var(--ink-3); stroke-width: 1.5; fill: none; }
+.v-dash { stroke-dasharray: 5 4; }
+.v-arrowhead { fill: var(--ink-3); }
+.v-grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 3; }
+.v-arc { stroke: var(--accent); stroke-width: 3; }
+
 /* ── 资源页 ── */
 .res-item { display: flex; gap: 14px; padding: 15px 0; border-bottom: 1px dashed var(--line); }
 .res-item:last-child { border-bottom: none; }
