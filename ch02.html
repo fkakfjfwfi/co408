@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>第 2 章 数据的表示和运算 · 408 计算机组成原理可视化课堂</title>
 <meta name="description" content="408 计算机组成原理第 2 章：原码反码补码、溢出判断、IEEE 754 浮点数、海明码与 CRC，附补码加法与浮点转换实验室。">
-<link rel="stylesheet" href="assets/style.css?v=1">
+<link rel="stylesheet" href="assets/style.css?v=2">
 </head>
 <body>
 <nav class="topbar"><div class="topbar-inner">
@@ -63,8 +63,16 @@
     <tr><td><b>移码</b></td><td>补码符号位取反</td><td><code class="inline">01010011</code>（−45+128=83）</td><td>−128 ~ +127</td><td>1 个</td></tr>
   </table>
 
+  <figure class="vis" data-vis="machine-codes">
+    <figcaption>图 2-1 · 同一组 8 位，四种编码的符号位和数值位排列：先看符号位，再按规则还原真值</figcaption>
+  </figure>
+
   <div class="callout exam"><div class="co-title">📌 补码的本质：模 2ⁿ 的“同余”</div>
   n 位补码把负数 X 表示为 <b>2ⁿ + X</b>。例如 8 位时 −45 的补码 = 256 − 45 = 211 = <code class="inline">11010011</code>。这样一来，<b>A − B 可以变成 A + (2ⁿ − B)</b>，减法器就可以用加法器实现。溢出被“模”自然丢掉，剩下的低 n 位就是正确结果（只要不超出范围）。</div>
+
+  <figure class="vis" data-vis="twos-circle">
+    <figcaption>图 2-2 · 补码像钟表：−45 和 211 指向同一个位置，加 211 再丢掉进位，就等于减 45</figcaption>
+  </figure>
 
   <h3 class="sub">符号扩展与移位</h3>
   <p><b>符号扩展：</b>把短补码扩展为长补码时，高位全部补符号位。例如 8 位 <code class="inline">1000 1010</code> 扩展到 16 位是 <code class="inline">1111 1111 1000 1010</code>；正数则补 0。</p>
@@ -131,6 +139,10 @@
     <tr><td>双精度 double</td><td>64</td><td>1</td><td>11</td><td>52</td><td>1023</td></tr>
   </table>
 
+  <figure class="vis" data-vis="ieee754">
+    <figcaption>图 2-3 · 单精度三块拼图：1 位符号 + 8 位阶码 + 23 位尾数；尾数前面还藏着一个 1</figcaption>
+  </figure>
+
   <h3 class="sub">规格化与隐含的 1</h3>
   <p>规格化浮点数的尾数满足 <code class="inline">1 ≤ M &lt; 2</code>，二进制形式为 <code class="inline">1.xxxxx</code>。既然最高位总是 1，IEEE 754 就<b>不存这个 1</b>，只存小数点后的 23/52 位，相当于白赚一位精度。所以单精度有效位数是 24 位（1 位隐含 + 23 位显式）。</p>
 
@@ -179,6 +191,11 @@ M = 10001100000000000000000₂（小数点后 23 位）
     <div class="step"><b>舍入：</b>右移或规格化可能丢位，按 IEEE 754 的舍入方式处理。默认“就近舍入到偶数”。</div>
     <div class="step"><b>溢出判断：</b>阶码超出上限 → 溢出（∞）；低于下限 → 下溢（按 0 或非规格化数处理）。</div>
   </div>
+
+  <figure class="vis" data-vis="float-add">
+    <figcaption>图 2-4 · 浮点加减五步：先对阶，再加减，然后规格化、舍入，最后判断溢出</figcaption>
+  </figure>
+
   <div class="callout warn"><div class="co-title">⚠️ 为什么小阶向大阶看齐？</div>
   如果让大阶数的尾数左移去迁就小阶，尾数可能超出表示范围而丢失高位，造成<b>大数被破坏</b>。让小阶数的尾数右移，丢的是低位（精度损失），不会破坏数量级。所以对阶方向不能反。</div>
 
@@ -206,6 +223,11 @@ M = 10001100000000000000000₂（小数点后 23 位）
     <tr><td>P2（第 2 位）</td><td>2, 3, 6, 7</td><td>位置编号次低位为 1</td></tr>
     <tr><td>P4（第 4 位）</td><td>4, 5, 6, 7</td><td>位置编号第 3 位为 1</td></tr>
   </table>
+
+  <figure class="vis" data-vis="hamming">
+    <figcaption>图 2-5 · 海明码的分组：每个校验位负责一组位置，故障字相加就能指出出错位</figcaption>
+  </figure>
+
   <p>海明码可纠正 1 位错误、检测 2 位错误（标准海明码对 2 位错误可能误纠，实际常用扩展海明码加 1 位总校验位）。</p>
 
   <h3 class="sub">CRC：模 2 除法</h3>
@@ -214,6 +236,11 @@ M = 10001100000000000000000₂（小数点后 23 位）
   <pre class="code">1101000 ÷ 1011（模 2 除）
 余数 = 001
 发送码字 = 1101 001</pre>
+
+  <figure class="vis" data-vis="crc-division">
+    <figcaption>图 2-6 · CRC 模 2 除法：每一步只做异或，最后剩下的 3 位就是校验位</figcaption>
+  </figure>
+
   <p>接收方用同一 G(x) 除收到的码字，余数为 0 则认为无错（或错误未检出）。CRC 检错能力强、实现简单，广泛用于网络和存储。</p>
 
   <h2 class="sec" id="deep">🚀 进阶深挖（教材级）</h2>
@@ -269,6 +296,7 @@ M = 10001100000000000000000₂（小数点后 23 位）
 </footer>
 <script src="assets/questions.js?v=1"></script>
 <script src="assets/app.js?v=1"></script>
+<script src="assets/visuals.js?v=1"></script>
 <script src="assets/labs.js?v=1"></script>
 </body>
 </html>
