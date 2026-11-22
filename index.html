@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>408 计算机组成原理可视化课堂 · 从门电路到整机</title>
+<meta name="description" content="为 408 考研准备的计算机组成原理学习站：7 章知识体系、8 个交互实验室、70 道分级练习、备考方法论。">
+<link rel="stylesheet" href="assets/style.css?v=1">
+</head>
+<body>
+<nav class="topbar"><div class="topbar-inner">
+  <a class="logo" href="index.html"><span class="dot"></span>408 计组可视化课堂</a>
+  <div class="nav-links">
+    <a href="index.html">总览</a><a href="ch01.html">系统概述</a><a href="ch02.html">数据表示</a><a href="ch03.html">存储系统</a><a href="ch04.html">指令系统</a><a href="ch05.html">CPU</a><a href="ch06.html">总线</a><a href="ch07.html">I/O</a><a href="practice.html">练习场</a><a href="method.html">备考方法论</a><a href="resources.html">资源导航</a>
+  </div>
+  <button class="theme-btn" title="切换明暗主题">🌙</button>
+</div></nav>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="kicker">408 · COMPUTER ORGANIZATION</span>
+    <h1>把计算机<em>拆开</em>给你看</h1>
+    <p>这是为 <b>408 考研</b>准备的计算机组成原理学习站：从冯·诺依曼结构一路拆到 ALU、Cache、流水线和中断。每个概念先讲人话，再用<b>可交互实验室</b>把地址、位域、时序演出来，最后落到考点、避坑清单和分级练习。</p>
+    <p class="tagline"><span data-ck-total>已打卡 0 项</span> · 打卡与答题进度自动保存在本机浏览器 · 与数据结构站同一套学习节奏</p>
+    <div class="stats">
+      <div class="stat"><b>7</b><span>章考纲全覆盖</span></div>
+      <div class="stat"><b>8</b><span>个交互实验室</span></div>
+      <div class="stat"><b>70</b><span>道分级练习</span></div>
+      <div class="stat"><b>1</b><span>套备考方法论</span></div>
+    </div>
+  </div>
+
+  <h2 class="sec">为什么这么学</h2>
+  <div class="grid cols-2">
+    <div class="card">
+      <h3>🧱 先拆结构：一台机器分几层</h3>
+      <p>计组最怕“背部件”。本站按<b>应用 → 指令 → 数据通路 → 门电路</b>的顺序往下钻：先知道每一层解决什么问题，再记它长什么样。每章开头都有“这一章在整机里的位置”。</p>
+    </div>
+    <div class="card">
+      <h3>🔬 再算给你看：地址、位域、时序都能动手</h3>
+      <p>浮点数编码、补码溢出、Cache 的 tag/index/offset、流水线时空图、总线带宽、中断/DMA 流程——全部做成可调参数的小实验室，改一个数就能看到结果怎么变。</p>
+    </div>
+    <div class="card">
+      <h3>✍️ 最后落到考试：70 题 + 真题改编</h3>
+      <p>7 章共 <b>70 道</b>分级练习（基础 / 提高 / 真题改编），每题带解析。练习场支持<b>按章节/难度筛选、只看错题、只看收藏、随机 20 题</b>，答错自动进错题本。</p>
+    </div>
+    <div class="card">
+      <h3>🧭 还教你怎么学：方法论独立成页</h3>
+      <p><a href="method.html">备考方法论</a>写清：计组 45 分怎么分布、三轮时间怎么切、错题本三栏法、大题采分点、精确记忆清单、五个最容易弃疗的知识点怎么破。</p>
+    </div>
+  </div>
+
+  <div class="callout exam">
+    <div class="co-title">📌 408 计组的分值感</div>
+    408 总分 150：数据结构 45 + 计算机组成原理 45 + 操作系统 35 + 计算机网络 25。计组通常 <b>11 道选择（22 分）+ 2 道综合题（约 23 分）</b>，是“选择决定下限、大题决定上限”的科目。具体题量每年略有浮动，但存储系统、CPU、数据表示三块始终是重心。
+  </div>
+
+  <h2 class="sec">知识体系总览 · 计算机组成原理篇</h2>
+  <p class="muted">对齐 408 考纲，七章全部上线。每章 = 生活类比 + 分节详解 + 考点地图 + 交互实验室 + 避坑清单 + 分级练习 + 打卡清单。</p>
+  <div class="grid cols-2" style="margin-top:14px">
+    <a class="card clickable" href="ch01.html">
+      <span class="ch-num">第 1 章 · 已上线</span>
+      <h3>计算机系统概述</h3>
+      <p>冯·诺依曼结构 / 存储程序 / 硬件组成 / 多级层次 / 性能指标与 Amdahl 定律。</p>
+      <div class="chips"><span class="chip hot">性能换算实验室</span><span class="chip">8 题</span><span class="chip cyan">选择 + 概念题</span></div>
+    </a>
+    <a class="card clickable" href="ch02.html">
+      <span class="ch-num">第 2 章 · 已上线</span>
+      <h3>数据的表示和运算</h3>
+      <p>原码/反码/补码/移码 / 溢出判断 / IEEE 754 浮点 / 浮点加减 / 海明码与 CRC。</p>
+      <div class="chips"><span class="chip hot">补码 + 浮点实验室</span><span class="chip">12 题</span><span class="chip cyan">大题常客</span></div>
+    </a>
+    <a class="card clickable" href="ch03.html">
+      <span class="ch-num">第 3 章 · 已上线</span>
+      <h3>存储系统</h3>
+      <p>存储层次 / SRAM/DRAM / 芯片扩展 / 低位交叉 / Cache 映射与写策略 / 虚拟存储器与 TLB。</p>
+      <div class="chips"><span class="chip hot">Cache 命中实验室</span><span class="chip">12 题</span><span class="chip cyan">大题最高频</span></div>
+    </a>
+    <a class="card clickable" href="ch04.html">
+      <span class="ch-num">第 4 章 · 已上线</span>
+      <h3>指令系统</h3>
+      <p>指令格式 / 扩展操作码 / 十种寻址方式 / RISC 与 CISC / 机器级代码 / 大小端与对齐。</p>
+      <div class="chips"><span class="chip hot">寻址计算实验室</span><span class="chip">10 题</span><span class="chip cyan">选择高频</span></div>
+    </a>
+    <a class="card clickable" href="ch05.html">
+      <span class="ch-num">第 5 章 · 已上线</span>
+      <h3>中央处理器</h3>
+      <p>CPU 结构 / 指令周期 / 数据通路 / 硬布线与微程序 / 五段流水线 / 结构、数据、控制冒险。</p>
+      <div class="chips"><span class="chip hot">流水线时空图</span><span class="chip">10 题</span><span class="chip cyan">大题高频</span></div>
+    </a>
+    <a class="card clickable" href="ch06.html">
+      <span class="ch-num">第 6 章 · 已上线</span>
+      <h3>总线</h3>
+      <p>总线分类 / 带宽计算 / 同步与异步定时 / 三种仲裁方式 / PCIe 与串行总线。</p>
+      <div class="chips"><span class="chip hot">带宽计算实验室</span><span class="chip">8 题</span><span class="chip cyan">选择为主</span></div>
+    </a>
+    <a class="card clickable" href="ch07.html">
+      <span class="ch-num">第 7 章 · 已上线</span>
+      <h3>输入/输出系统</h3>
+      <p>I/O 接口与编址 / 程序查询 / 中断响应与嵌套 / DMA 三种方式 / 通道与 I/O 处理机。</p>
+      <div class="chips"><span class="chip hot">中断/DMA 流程演示</span><span class="chip">10 题</span><span class="chip cyan">选择 + 简答</span></div>
+    </a>
+  </div>
+
+  <h2 class="sec">📊 408 计组分值地图（经验分布）</h2>
+  <p class="muted">下表是历年真题的经验归纳，不是官方比例；用来决定“时间投在哪”，不要拿来押题。</p>
+  <table class="tbl">
+    <tr><th>章节</th><th>选择题量</th><th>综合题</th><th>热度</th><th>核心考点</th></tr>
+    <tr><td>第 1 章 系统概述</td><td>1~2 题</td><td>少</td><td>★★</td><td>冯·诺依曼、层次结构、性能公式</td></tr>
+    <tr class="hot-row"><td>第 2 章 数据表示</td><td>2~3 题</td><td>0~1 题</td><td>★★★★</td><td>补码、溢出、IEEE 754、海明码</td></tr>
+    <tr class="hot-row"><td>第 3 章 存储系统</td><td>3~4 题</td><td>1 题</td><td>★★★★★</td><td>芯片扩展、Cache 映射、虚存/TLB</td></tr>
+    <tr><td>第 4 章 指令系统</td><td>2~3 题</td><td>0~1 题</td><td>★★★★</td><td>寻址方式、扩展操作码、RISC/CISC</td></tr>
+    <tr class="hot-row"><td>第 5 章 CPU</td><td>2~3 题</td><td>1 题</td><td>★★★★★</td><td>数据通路、微程序、流水线/冒险</td></tr>
+    <tr><td>第 6 章 总线</td><td>1~2 题</td><td>少</td><td>★★</td><td>带宽、定时、仲裁</td></tr>
+    <tr><td>第 7 章 I/O</td><td>2~3 题</td><td>0~1 题</td><td>★★★</td><td>中断流程、DMA、I/O 编址</td></tr>
+  </table>
+
+  <h2 class="sec">🧭 学习路径（零基础 / 跨考适用）</h2>
+  <div class="steps">
+    <div class="step"><b>第 0 步 · 先读方法论：</b>去<a href="method.html">备考方法论</a>把“三轮怎么切、错题本怎么写、大题怎么拿步骤分”看一遍。方法错了，后面投入全废。</div>
+    <div class="step"><b>第 1 步 · 按 01 → 07 过章：</b>每章先看“这一章在整机里的位置” → 读生活类比 → 读分节详解 → 动手玩实验室 → 做章内练习 → 完成打卡。</div>
+    <div class="step"><b>第 2 步 · 用练习场查漏：</b>去<a href="practice.html">练习场</a>按章节/难度筛选，先做基础，再做提高和真题改编；错题自动进错题本，用“只看错题”重做三遍。</div>
+    <div class="step"><b>第 3 步 · 配合教材：</b>以唐朔飞/袁春风教材或王道单科书为主线，本站当作“看不懂时的可视化字典”。看到公式就回到对应实验室改参数验证。</div>
+    <div class="step"><b>第 4 步 · 大题动手写：</b>Cache 地址划分、主存扩展、数据通路微操作、流水线时空图，必须<b>在纸上完整写一遍</b>，不能只看懂。每道大题按“公式 + 代入 + 结果 + 单位”四行写。</div>
+  </div>
+
+  <h2 class="sec">🔍 四组最容易混的概念（先记这张表）</h2>
+  <table class="tbl">
+    <tr><th>概念 A</th><th>概念 B</th><th>一句话区分</th></tr>
+    <tr><td>机器字长</td><td>指令字长 / 存储字长</td><td>CPU 一次能处理多少位 / 一条指令多少位 / 一个存储单元多少位，三者可以不同</td></tr>
+    <tr><td>Cache 缺失</td><td>缺页</td><td>Cache 没命中，去主存取块；页不在主存，要去磁盘调页，代价差几个数量级</td></tr>
+    <tr><td>中断</td><td>DMA</td><td>中断让 CPU 来处理事件；DMA 让控制器直接搬数据块，CPU 只在首尾参与</td></tr>
+    <tr><td>同步定时</td><td>异步定时</td><td>统一时钟、快但挑设备 / 握手信号、慢但适应性强</td></tr>
+  </table>
+
+  <div class="callout ok">
+    <div class="co-title">✅ 使用说明</div>
+    1. 每章结构固定：学习目标 → 生活类比 → 分节详解 → 实验室 → 进阶深挖 → 避坑清单 → 章内练习 → 打卡；<br>
+    2. 打卡、答题、错题、收藏都存在浏览器 localStorage，换页面不丢；<br>
+    3. 题目中的“真题改编”是题面改写与考点还原，不宣称原题；复习时仍以真题原文为准；<br>
+    4. 所有实验室都是纯前端 JS，不联网、不上传数据，可以放心改参数。
+  </div>
+</div>
+
+<footer>
+  408 计算机组成原理可视化课堂 · 7 章知识体系 + 8 个实验室 + 70 道分级练习<br>
+  <div class="pagers">
+    <a href="ch01.html">开始学习 第 1 章 →</a>
+    <a href="practice.html">去练习场 →</a>
+    <a href="method.html">先看备考方法论 →</a>
+  </div>
+</footer>
+<script src="assets/app.js?v=1"></script>
+</body>
+</html>
