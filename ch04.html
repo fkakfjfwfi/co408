@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 4 章 指令系统 · 408 计算机组成原理可视化课堂</title>
+<meta name="description" content="408 计算机组成原理第 4 章：指令格式、扩展操作码、十种寻址方式、RISC/CISC、机器级代码、大小端与对齐，附寻址计算实验室。">
+<link rel="stylesheet" href="assets/style.css?v=1">
+</head>
+<body>
+<nav class="topbar"><div class="topbar-inner">
+  <a class="logo" href="index.html"><span class="dot"></span>408 计组可视化课堂</a>
+  <div class="nav-links">
+    <a href="index.html">总览</a><a href="ch01.html">系统概述</a><a href="ch02.html">数据表示</a><a href="ch03.html">存储系统</a><a href="ch04.html">指令系统</a><a href="ch05.html">CPU</a><a href="ch06.html">总线</a><a href="ch07.html">I/O</a><a href="practice.html">练习场</a><a href="method.html">备考方法论</a><a href="resources.html">资源导航</a>
+  </div>
+  <button class="theme-btn" title="切换明暗主题">🌙</button>
+</div></nav>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="kicker">CHAPTER 04 · 指令系统</span>
+    <h1>第 4 章 · 指令是硬件与软件的“合同”</h1>
+    <p>指令系统（ISA）是软件能看到的最底层接口：<b>一条指令长什么样、操作数在哪里、下一条去哪</b>，全由它规定。408 常在这一章考“有效地址计算、扩展操作码、RISC/CISC、大小端与对齐”。</p>
+    <p class="tagline">预计 3~4 小时 · 1 个寻址实验室 · 10 道分级练习 · 选择 + 大题都可能出现</p>
+    <div class="stats">
+      <div class="stat"><b>10</b><span>常考寻址方式</span></div>
+      <div class="stat"><b>2</b><span>RISC / CISC 路线</span></div>
+      <div class="stat"><b>4</b><span>指令地址码数量</span></div>
+    </div>
+  </div>
+
+  <div class="toc"><span class="toc-label">本页导航</span><a href="#goal">学习目标</a><a href="#s1">指令格式</a><a href="#s2">扩展操作码</a><a href="#s3">寻址方式</a><a href="#lab">寻址实验室</a><a href="#s4">RISC/CISC</a><a href="#s5">机器级代码</a><a href="#s6">对齐与大小端</a><a href="#deep">进阶</a><a href="#pit">避坑</a><a href="#quiz">练习</a><a href="#ck">打卡</a></div>
+
+  <div class="callout exam" id="goal"><div class="co-title">🎯 学习目标（学完你应该能）</div>
+  ① 画出指令的基本格式，区分零/一/二/三地址指令；<br>
+  ② 用扩展操作码规则设计/计算指令条数，知道“短操作码不能是长操作码前缀”；<br>
+  ③ 对十种寻址方式，写出有效地址公式和取操作数访存次数；<br>
+  ④ 区分基址寻址与变址寻址的适用场景；<br>
+  ⑤ 说出 RISC 与 CISC 的主要差异；<br>
+  ⑥ 判断大小端存储顺序，计算结构体对齐后的地址。</div>
+
+  <h2 class="sec" id="s1">4.1 指令格式：操作码 + 地址码</h2>
+  <div class="callout life"><div class="co-title">📝 生活类比</div>
+  一条指令像一张<b>快递单</b>：操作码是“做什么”（寄件/退件），地址码是“寄到哪、从哪寄”。有的单子只需一个地址（退件），有的需要两个（寄件人 + 收件人），有的甚至不需要地址（“停机”）。</div>
+
+  <p>一条指令通常由<b>操作码</b>和<b>地址码</b>组成。操作码指出做什么操作（加、减、取数、跳转），地址码给出操作数或下一条指令的地址。</p>
+  <table class="tbl">
+    <tr><th>格式</th><th>地址码个数</th><th>典型用途</th><th>例子</th></tr>
+    <tr><td>零地址</td><td>0</td><td>空操作、停机；堆栈计算机的运算</td><td><code class="inline">NOP</code>、<code class="inline">ADD</code>（隐含栈顶）</td></tr>
+    <tr><td>一地址</td><td>1</td><td>单操作数运算；一个操作数隐含在 ACC</td><td><code class="inline">INC A</code>、<code class="inline">ADD A</code>（ACC ← ACC + A）</td></tr>
+    <tr><td>二地址</td><td>2</td><td>最常见的双操作数运算</td><td><code class="inline">ADD R1, R2</code></td></tr>
+    <tr><td>三地址</td><td>3</td><td>两个源 + 一个目的，互不覆盖</td><td><code class="inline">ADD R1, R2, R3</code></td></tr>
+  </table>
+  <p><b>指令字长</b>是一条指令的二进制位数，可以等于机器字长，也可以是它的整数倍。定长指令字长便于硬件译码和流水线；变长指令字长可以节省空间，但取指和译码更复杂（x86 就是变长）。</p>
+
+  <h2 class="sec" id="s2">4.2 扩展操作码：在有限位数里塞更多指令</h2>
+  <p>如果操作码固定为 k 位，最多只有 2ᵏ 条指令。想在同样字长里增加指令条数，可以让操作码长度可变：一部分编码留作“扩展前缀”，把地址码字段借来当更长的操作码。</p>
+  <div class="callout warn"><div class="co-title">⚠️ 唯一铁律</div>
+  <b>短操作码不能是长操作码的前缀。</b>否则译码器读到短码时，无法判断这是完整指令还是更长指令的开头。例如 4 位操作码用了 0000~1110，1111 才能作为扩展前缀；扩展出的长码必须以 1111 开头，且不能与任何短码相同。</div>
+  <p><b>常见设计：</b>4 位基本操作码，0000~1110 表示 15 条三地址指令；1111 作为前缀，再用下一个 4 位扩展出 15 条二地址指令；1111 1111 再扩展……每层留一个“全 1”作为继续扩展的标志。具体能扩展多少条，取决于还剩多少位可用。</p>
+  <p><b>考法：</b>题目给“指令字长 16 位、操作码 4 位、地址码 4 位、要求支持 X 条三地址、Y 条二地址……”，让你判断是否可行或求某字段位数。做法：先满足短码数量，再算剩余编码空间，注意前缀约束。</p>
+
+  <h2 class="sec" id="s3">4.3 寻址方式：操作数到底在哪</h2>
+  <p>寻址方式回答两个问题：<b>有效地址怎么算</b>、<b>取操作数要访存几次</b>。408 常把这两个点放在一道选择题里。</p>
+  <table class="tbl">
+    <tr><th>寻址方式</th><th>有效地址 / 操作数</th><th>取操作数访存次数</th><th>特点</th></tr>
+    <tr><td>隐含寻址</td><td>操作数隐含在 ACC 或栈顶</td><td>0</td><td>指令短，灵活性差</td></tr>
+    <tr><td>立即寻址</td><td>操作数 = A</td><td>0</td><td>快，但操作数范围受指令字长限制</td></tr>
+    <tr><td>直接寻址</td><td>EA = A</td><td>1</td><td>简单，寻址范围受地址字段位数限制</td></tr>
+    <tr><td>一次间接寻址</td><td>EA = (A)</td><td>2</td><td>扩大寻址范围，但多一次访存</td></tr>
+    <tr><td>寄存器寻址</td><td>操作数 = R</td><td>0</td><td>快，寄存器数量有限</td></tr>
+    <tr><td>寄存器间接寻址</td><td>EA = (R)</td><td>1</td><td>寻址范围大，寄存器存地址</td></tr>
+    <tr><td>相对寻址</td><td>EA = (PC) + A</td><td>1</td><td>程序浮动，适合转移指令</td></tr>
+    <tr><td>基址寻址</td><td>EA = (BR) + A</td><td>1</td><td>程序重定位，BR 由 OS 设定</td></tr>
+    <tr><td>变址寻址</td><td>EA = (IX) + A</td><td>1</td><td>数组/循环，IX 可变</td></tr>
+    <tr><td>堆栈寻址</td><td>操作数在栈顶</td><td>0 或 1</td><td>与 push/pop 配合，支持零地址运算</td></tr>
+  </table>
+
+  <div class="callout exam"><div class="co-title">📌 基址 vs 变址：公式像，用途不同</div>
+  两者都写成 <code class="inline">EA = 寄存器 + A</code>，但：<b>基址寻址</b>的寄存器内容由操作系统/程序固定（程序首地址），A 是位移，用于程序重定位；<b>变址寻址</b>的 A 是数组首地址，寄存器内容是变化的索引，用于访问数组元素。做题时看“谁在变”。</div>
+
+  <p><b>相对寻址的 PC 是“下一条指令地址”：</b>取指后 PC 已经更新，所以 <code class="inline">EA = 下一条指令地址 + A</code>。A 通常是有符号补码，可向前或向后跳转。若题目给“当前指令地址”，要先加上指令长度再算。</p>
+
+  <div class="lab" id="lab-ea">
+    <div class="lab-title">🔬 实验室 · 寻址方式计算器</div>
+    <div class="lab-desc">选择寻址方式，输入 A、PC、R1（以及间接寻址的 M[A]），看有效地址和“取操作数访存次数”。</div>
+    <div class="lab-stage">
+      <div class="lab-ctrl">
+        <label class="lab-field">寻址方式<select id="ea-mode">
+          <option value="imm">立即寻址</option>
+          <option value="direct">直接寻址</option>
+          <option value="indirect">一次间接寻址</option>
+          <option value="reg">寄存器寻址</option>
+          <option value="regind">寄存器间接寻址</option>
+          <option value="rel">相对寻址</option>
+          <option value="base">基址寻址</option>
+          <option value="index">变址寻址</option>
+        </select></label>
+        <label class="lab-field">A（十六进制）<input id="ea-a" type="text" value="0x0010"></label>
+        <label class="lab-field">PC（下一条指令）<input id="ea-pc" type="text" value="0x1000"></label>
+        <label class="lab-field">R1 / BR / IX<input id="ea-r1" type="text" value="0x2000"></label>
+        <label class="lab-field">M[A]（间接用）<input id="ea-ma" type="text" value="0x3000"></label>
+        <button id="ea-go" type="button">计算有效地址</button>
+      </div>
+      <div class="lab-out" id="ea-out"></div>
+    </div>
+    <div class="lab-note" id="ea-note"></div>
+  </div>
+
+  <h2 class="sec" id="s4">4.4 RISC 与 CISC：两种设计哲学</h2>
+  <table class="tbl">
+    <tr><th>维度</th><th>CISC</th><th>RISC</th></tr>
+    <tr><td>指令数量</td><td>多（几百条）</td><td>少（几十~一百多条）</td></tr>
+    <tr><td>指令长度</td><td>可变</td><td>定长</td></tr>
+    <tr><td>寻址方式</td><td>多而复杂</td><td>少而简单</td></tr>
+    <tr><td>访存指令</td><td>很多指令可直接访存</td><td>只有 load/store 访存</td></tr>
+    <tr><td>控制器</td><td>多用微程序</td><td>多用硬布线</td></tr>
+    <tr><td>寄存器</td><td>较少</td><td>较多</td></tr>
+    <tr><td>流水线</td><td>较难</td><td>容易</td></tr>
+    <tr><td>典型</td><td>x86</td><td>ARM、RISC-V、MIPS</td></tr>
+  </table>
+  <p>RISC 的思想是“<b>简单规则，让硬件跑得快</b>”：指令定长、格式少、只有 load/store 访存、运算都在寄存器间进行，便于流水线和编译器优化。CISC 的思想是“<b>让一条指令做更多事</b>”，减少程序指令数，但硬件复杂。现代 x86 内部会把复杂指令翻译成类 RISC 的微操作，两者边界已经模糊。</p>
+
+  <h2 class="sec" id="s5">4.5 从高级语言到机器级代码</h2>
+  <p>408 大纲要求理解“高级语言程序与机器级代码之间的对应”。不需要会写大型汇编，但要能看懂：变量放哪、循环怎么跳、函数怎么调用。</p>
+
+  <h3 class="sub">栈帧与过程调用</h3>
+  <p>函数调用时，系统在栈上分配一个<b>栈帧</b>，典型内容包括：</p>
+  <div class="steps">
+    <div class="step"><b>参数：</b>调用者把参数放入寄存器（如 x86-64 的 RDI、RSI、RDX…）或压栈。</div>
+    <div class="step"><b>返回地址：</b><code class="inline">call</code> 指令把下一条指令地址压栈。</div>
+    <div class="step"><b>旧帧指针：</b>保存调用者的 RBP，建立当前函数的栈帧。</div>
+    <div class="step"><b>局部变量与保存的寄存器：</b>函数内部使用的局部变量、被调用者保存寄存器。</div>
+    <div class="step"><b>返回：</b><code class="inline">leave</code> / <code class="inline">ret</code> 恢复栈指针和帧指针，弹出返回地址跳回。</div>
+  </div>
+  <p>x86-64 中常见约定：整数参数依次用 <code class="inline">%rdi, %rsi, %rdx, %rcx, %r8, %r9</code>，返回值在 <code class="inline">%rax</code>，栈向低地址增长，<code class="inline">%rsp</code> 是栈指针，<code class="inline">%rbp</code> 是帧指针。</p>
+
+  <pre class="code">// C 语言
+long sum(long *a, long n) {
+    long s = 0;
+    for (long i = 0; i &lt; n; i++) s += a[i];
+    return s;
+}
+
+// 对应的 x86-64 风格汇编（示意）
+sum:
+    movq    $0, %rax          // s = 0
+    movq    $0, %rcx          // i = 0
+.Lloop:
+    cmpq    %rsi, %rcx        // 比较 i 与 n
+    jge     .Ldone            // i >= n 则结束
+    addq    (%rdi,%rcx,8), %rax  // s += a[i]（8 字节元素）
+    incq    %rcx              // i++
+    jmp     .Lloop
+.Ldone:
+    ret</pre>
+  <p>这段代码体现了三个机器级概念：<b>数组元素地址 = 基址 + 下标 × 元素大小</b>（比例变址寻址）；<b>循环用比较 + 条件跳转</b>；<b>返回值放在约定寄存器</b>。</p>
+
+  <h3 class="sub">选择与循环的机器级形态</h3>
+  <table class="tbl">
+    <tr><th>高级语言</th><th>机器级实现</th><th>关键指令</th></tr>
+    <tr><td><code class="inline">if (a &gt; b) ... else ...</code></td><td>比较后条件跳转，两个分支各自成块</td><td><code class="inline">cmp</code> + <code class="inline">jg/jle</code></td></tr>
+    <tr><td><code class="inline">while (i &lt; n) ...</code></td><td>循环头比较，条件不满足跳出，末尾跳回</td><td><code class="inline">cmp</code> + <code class="inline">jge</code> + <code class="inline">jmp</code></td></tr>
+    <tr><td><code class="inline">for (i=0; i&lt;n; i++)</code></td><td>初始化 + 循环头 + 步进 + 跳回</td><td>同上，步进用 <code class="inline">inc/add</code></td></tr>
+    <tr><td>函数调用</td><td>传参、<code class="inline">call</code>、建栈帧、返回</td><td><code class="inline">call/ret</code>、<code class="inline">push/pop</code></td></tr>
+  </table>
+
+  <h2 class="sec" id="s6">4.6 大小端与边界对齐</h2>
+  <h3 class="sub">大小端</h3>
+  <p>一个多字节数据在内存中按字节存放，字节顺序有两种约定：</p>
+  <table class="tbl">
+    <tr><th>方式</th><th>低地址放</th><th>0x12345678 的存放</th><th>典型</th></tr>
+    <tr><td>大端（big-endian）</td><td>最高有效字节</td><td>12 34 56 78</td><td>部分 RISC、网络字节序</td></tr>
+    <tr><td>小端（little-endian）</td><td>最低有效字节</td><td>78 56 34 12</td><td>x86、ARM（可配置）</td></tr>
+  </table>
+  <p>判断技巧：把数据写成 0x12345678，<b>小端就是“倒着抄”</b>：78 56 34 12。题目若给“从低地址到高地址的字节”，按这个顺序写。</p>
+
+  <h3 class="sub">边界对齐</h3>
+  <p>很多处理器要求数据的地址是其大小的整数倍：4 字节 int 的地址必须是 4 的倍数，8 字节 double 必须是 8 的倍数。编译器会在结构体成员之间插入<b>填充字节</b>，保证每个成员对齐，并让结构体总大小是其最大成员对齐值的整数倍。</p>
+  <pre class="code">struct S {
+    char  c;      // 偏移 0，占 1 字节
+    // 3 字节填充
+    int   i;      // 偏移 4，占 4 字节
+    short s;      // 偏移 8，占 2 字节
+    // 2 字节填充（使总大小为 4 的倍数）
+};                // sizeof(struct S) = 12</pre>
+  <p>不对齐访问可能导致多次访存、性能下降，某些架构甚至直接异常。408 可能考“结构体大小/某成员偏移”，按“每个成员对齐 + 总大小对齐到最大对齐值”两步算。</p>
+
+  <h2 class="sec" id="deep">🚀 进阶深挖（教材级）</h2>
+  <h3 class="sub">深挖 1 · 扩展操作码的编码空间计算</h3>
+  <p>设指令字长 16 位，基本操作码 4 位，三地址格式有 3 个 4 位地址字段。若要用 15 条三地址指令，操作码 0000~1110；1111 留作扩展。扩展时把第一个地址字段的 4 位并入操作码，得到 8 位操作码，其中 1111 0000~1111 1110 可表示 15 条二地址指令，1111 1111 继续扩展……每层牺牲一个编码作为“继续”标志。计算时牢记：<b>可用的长码数量 = 扩展前缀数 × 2^借用位数 − 继续扩展保留数</b>。</p>
+
+  <h3 class="sub">深挖 2 · 为什么 RISC 更适合流水线</h3>
+  <p>流水线要求各段耗时均衡、指令格式规整。RISC 指令定长、寻址方式少、只有 load/store 访存，取指和译码可以并行，寄存器编号位置固定，所以五段流水线容易实现。CISC 指令长度可变、寻址方式多，译码阶段可能很长，流水线需要复杂的拆分和预测。</p>
+
+  <h3 class="sub">深挖 3 · 指令级并行与 ISA 的关系</h3>
+  <p>指令系统的设计会影响编译器能否调度、CPU 能否乱序执行。例如定长指令便于取指和分支预测；大量寄存器减少溢出；load/store 分离让访存阶段独立。408 不要求设计 ISA，但会问“某特性对流水线/编译有什么影响”，答题时从“规整性、并行性、访存次数”三个角度展开。</p>
+
+  <div class="callout views"><div class="co-title">🌐 多源视角</div>
+  <ul>
+    <li><b>【唐朔飞】</b>把寻址方式按“操作数在指令中/在寄存器中/在主存中”分类，先讲 EA 再讲访存次数。本站用法：做题先问“操作数在哪”，再套公式。</li>
+    <li><b>【CSAPP】</b>用 x86-64 讲“程序 = 指令 + 数据”，强调栈帧、寄存器约定和比例变址。本站用法：看到 <code class="inline">(%rdi,%rcx,8)</code> 要能还原成 <code class="inline">a[i]</code>。</li>
+    <li><b>【Patterson & Hennessy】</b>把 RISC 设计总结为“简单指令、大量寄存器、load/store、流水线”。本站用法：RISC/CISC 选择题优先选“定长、少数寻址、只有 load/store 访存”。</li>
+  </ul>
+  <div class="src">参考：唐朔飞《计算机组成原理》第 7 章；CSAPP 第 3 章；Patterson & Hennessy 第 2、4 章。</div></div>
+
+  <h2 class="sec" id="pit">⚠️ 本章避坑清单</h2>
+  <div class="steps">
+    <div class="step">相对寻址的 PC 是<b>下一条指令地址</b>，不是当前指令地址；题目给当前地址时要先加指令长度。</div>
+    <div class="step">基址寻址的寄存器内容固定、A 是位移；变址寻址的 A 是首地址、寄存器内容变化。不要只看公式一样就混用。</div>
+    <div class="step">一次间接寻址取操作数访存 2 次（先取 EA，再取操作数），取指另算 1 次；题目问“取操作数”时不要加取指。</div>
+    <div class="step">扩展操作码必须保证短码不是长码前缀，否则译码歧义。</div>
+    <div class="step">小端是“低地址放低字节”，0x12345678 写成 78 56 34 12，不是 87 65 43 21。</div>
+    <div class="step">结构体对齐要算填充字节，总大小还要对齐到最大成员对齐值；不要只把成员大小相加。</div>
+  </div>
+
+  <h2 class="sec" id="quiz">📝 章内练习（<span data-quiz-count>10</span> 题 · 基础 → 提高 → 真题改编）</h2>
+  <p class="muted">寻址方式、扩展操作码、RISC/CISC、大小端全覆盖。</p>
+  <div data-quiz-ch="4"></div>
+
+  <h2 class="sec" id="ck">✅ 本章打卡</h2>
+  <div data-ck-scope>
+    <p><span class="progress-pill">0 / 5 已打卡</span></p>
+    <div class="checklist">
+      <label class="check-item" data-ck="c4-1"><input type="checkbox"><span>能画出零/一/二/三地址指令格式，并各举一个例子</span></label>
+      <label class="check-item" data-ck="c4-2"><input type="checkbox"><span>能说出扩展操作码的前缀规则，并做一次编码空间计算</span></label>
+      <label class="check-item" data-ck="c4-3"><input type="checkbox"><span>能默写十种寻址方式的 EA 公式和取操作数访存次数</span></label>
+      <label class="check-item" data-ck="c4-4"><input type="checkbox"><span>能区分基址/变址/相对寻址的适用场景</span></label>
+      <label class="check-item" data-ck="c4-5"><input type="checkbox"><span>能判断大小端字节序，并计算结构体对齐后的大小</span></label>
+    </div>
+  </div>
+</div>
+
+<footer>
+  408 计算机组成原理可视化课堂 · 基础教学 + 交互实验室 + 分级题库<br>
+  <div class="pagers"><a href="ch03.html">← 第 3 章 存储系统</a><a href="ch05.html">第 5 章 CPU →</a><a href="practice.html">去练习场 →</a></div>
+</footer>
+<script src="assets/questions.js?v=1"></script>
+<script src="assets/app.js?v=1"></script>
+<script src="assets/labs.js?v=1"></script>
+</body>
+</html>
