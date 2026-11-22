@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>资源导航 · 408 计算机组成原理可视化课堂</title>
+<meta name="description" content="408 计算机组成原理资源导航：教材、网课、真题、模拟器与工具，按备考阶段给出使用建议。">
+<link rel="stylesheet" href="assets/style.css?v=1">
+</head>
+<body>
+<nav class="topbar"><div class="topbar-inner">
+  <a class="logo" href="index.html"><span class="dot"></span>408 计组可视化课堂</a>
+  <div class="nav-links">
+    <a href="index.html">总览</a><a href="ch01.html">系统概述</a><a href="ch02.html">数据表示</a><a href="ch03.html">存储系统</a><a href="ch04.html">指令系统</a><a href="ch05.html">CPU</a><a href="ch06.html">总线</a><a href="ch07.html">I/O</a><a href="practice.html">练习场</a><a href="method.html">备考方法论</a><a href="resources.html">资源导航</a>
+  </div>
+  <button class="theme-btn" title="切换明暗主题">🌙</button>
+</div></nav>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="kicker">RESOURCES · 资源导航</span>
+    <h1>📚 资源不在多，在“主线 + 题库 + 工具”</h1>
+    <p>计组资料很容易收集过头：书买了三本、网课存了五个、模拟器装了四个，最后都没看完。这一页按“<b>一本主线教材 + 一套题 + 一个可视化工具</b>”的原则筛选，并说明每个资源在什么阶段用。</p>
+    <p class="tagline">教材 · 网课 · 真题 · 模拟器 · 工具 · 使用原则</p>
+  </div>
+
+  <div class="toc"><span class="toc-label">本页导航</span><a href="#books">教材</a><a href="#courses">网课</a><a href="#exam">真题</a><a href="#tools">模拟器与工具</a><a href="#plan">搭配方案</a><a href="#rules">使用原则</a></div>
+
+  <h2 class="sec" id="books">一、教材与教辅：选一本做主線</h2>
+  <div class="card">
+    <div class="res-item">
+      <div class="res-icon">📘</div>
+      <div class="res-body">
+        <h4>唐朔飞《计算机组成原理》（第 3 版）</h4>
+        <p>国内最经典的计组教材，408 考纲覆盖度高，概念定义严谨，适合打基础。第 3、4 章存储、第 8、9 章 CPU 是重点。</p>
+        <div class="res-meta">适用：一轮主线 · <span class="star">★★★★★</span> · 建议配合王道单科书做课后题</div>
+      </div>
+    </div>
+    <div class="res-item">
+      <div class="res-icon">📗</div>
+      <div class="res-body">
+        <h4>袁春风《计算机组成与系统结构》</h4>
+        <p>南京大学教材，讲法更现代，强调“程序—指令—数据通路—存储”的贯通，适合想理解“为什么这样设计”的同学。</p>
+        <div class="res-meta">适用：一轮补充 · <span class="star">★★★★☆</span> · 与唐朔飞二选一为主線，另一本作对照</div>
+      </div>
+    </div>
+    <div class="res-item">
+      <div class="res-icon">📙</div>
+      <div class="res-body">
+        <h4>王道《计算机组成原理考研复习指导》</h4>
+        <p>408 应试导向最强，章节顺序贴近考纲，选择题量大。适合一轮后半段→二轮刷题，但概念解释不如教材细。</p>
+        <div class="res-meta">适用：一轮题 + 二轮查漏 · <span class="star">★★★★★</span> · 错题直接对应本站章节</div>
+      </div>
+    </div>
+    <div class="res-item">
+      <div class="res-icon">📕</div>
+      <div class="res-body">
+        <h4>天勤《计算机组成原理高分笔记》</h4>
+        <p>讲法口语化、图多，适合零基础第一遍“看得下去”。深度略浅，二轮需要补教材或王道。</p>
+        <div class="res-meta">适用：零基础入门 · <span class="star">★★★☆☆</span> · 不要只靠它覆盖大题</div>
+      </div>
+    </div>
+    <div class="res-item">
+      <div class="res-icon">📓</div>
+      <div class="res-body">
+        <h4>CSAPP《深入理解计算机系统》（第 3 版）</h4>
+        <p>不是考研教材，但第 2、3、6、9、10 章能把数据表示、机器级代码、存储层次、虚拟存储、I/O 讲透。适合“想真正理解”的补充阅读。</p>
+        <div class="res-meta">适用：进阶 · <span class="star">★★★★☆</span> · 不要在一轮逐页读，按需查章</div>
+      </div>
+    </div>
+    <div class="res-item">
+      <div class="res-icon">📔</div>
+      <div class="res-body">
+        <h4>Patterson &amp; Hennessy《Computer Organization and Design》</h4>
+        <p>国际经典，英文版/中文版均可。流水线、存储层次、I/O 的讲法非常清晰，适合配合第 5 章看时空图和冒险。</p>
+        <div class="res-meta">适用：进阶 · <span class="star">★★★★☆</span> · 重点读第 4 章（处理器）</div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="sec" id="courses">二、网课：选一个体系跟完</h2>
+  <div class="card">
+    <div class="res-item">
+      <div class="res-icon">🎬</div>
+      <div class="res-body">
+        <h4>王道计算机组成原理（B 站/王道网校）</h4>
+        <p>应试导向，章节与单科书对应，适合一轮快速建立考点框架。缺点是部分难点讲得偏应试，需要自己补教材。</p>
+        <div class="res-meta">适用：一轮 · <a href="https://search.bilibili.com/all?keyword=王道%20计算机组成原理" target="_blank" rel="noopener">B 站搜索</a> · <a href="https://www.cskaoyan.com/" target="_blank" rel="noopener">王道论坛</a></div>
+      </div>
+    </div>
+    <div class="res-item">
+      <div class="res-icon">🎓</div>
+      <div class="res-body">
+        <h4>南京大学 袁春风《计算机组成原理》（中国大学 MOOC）</h4>
+        <p>讲得深、逻辑连贯，适合想理解“指令如何驱动数据通路”的同学。时间紧可只看存储、CPU、I/O 部分。</p>
+        <div class="res-meta">适用：一轮补充/二轮深挖 · <a href="https://www.icourse163.org/search.htm?search=%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86" target="_blank" rel="noopener">中国大学 MOOC 搜索</a></div>
+      </div>
+    </div>
+    <div class="res-item">
+      <div class="res-icon">🎥</div>
+      <div class="res-body">
+        <h4>Crash Course Computer Science</h4>
+        <p>短小动画，适合零基础建立“计算机怎么从门电路走到程序”的直觉。不覆盖 408 计算题，只作兴趣/框架补充。</p>
+        <div class="res-meta">适用：入门 · <a href="https://www.youtube.com/playlist?list=PL8dPuuaLjXtNlUrzyH5r6jN9ulIgZBpdo" target="_blank" rel="noopener">YouTube 播放列表</a></div>
+      </div>
+    </div>
+    <div class="res-item">
+      <div class="res-icon">🧪</div>
+      <div class="res-body">
+        <h4>Nand2Tetris（从与非门到俄罗斯方块）</h4>
+        <p>项目式课程，从门电路搭到 CPU 和汇编器。对“数据通路/控制器”有奇效，但不适合作为 408 主线，时间紧不要开。</p>
+        <div class="res-meta">适用：进阶/兴趣 · <a href="https://www.nand2tetris.org/" target="_blank" rel="noopener">nand2tetris.org</a></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="sec" id="exam">三、真题与题库：最贵的资源</h2>
+  <div class="card">
+    <div class="res-item">
+      <div class="res-icon">📄</div>
+      <div class="res-body">
+        <h4>408 历年真题（2009 至今）</h4>
+        <p>最权威的命题口径。建议按<a href="method.html#real">真题两遍法</a>使用：第一遍不限时标考点，第二遍整套计时。最近一年留到三轮最后。</p>
+        <div class="res-meta">获取：王道/天勤真题册、正规出版社真题解析 · <span class="star">★★★★★</span></div>
+      </div>
+    </div>
+    <div class="res-item">
+      <div class="res-icon">🧠</div>
+      <div class="res-body">
+        <h4>本站练习场（70 题）</h4>
+        <p>按章节/难度筛选，自动错题本与收藏。题目为考纲覆盖与真题风格编写，适合一轮课后即时练、二轮查漏，不替代真题。</p>
+        <div class="res-meta">适用：全阶段 · <a href="practice.html">去练习场</a></div>
+      </div>
+    </div>
+    <div class="res-item">
+      <div class="res-icon">📝</div>
+      <div class="res-body">
+        <h4>王道《计算机组成原理》课后题 / 模拟题</h4>
+        <p>选择题量大，适合一轮打基础；模拟题质量参差，二轮后以真题为主，模拟题只用来练时间。</p>
+        <div class="res-meta">适用：一轮/二轮 · 注意甄别偏题怪题</div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="sec" id="tools">四、模拟器与工具：把“看懂”变成“看见”</h2>
+  <div class="grid cols-2">
+    <div class="card">
+      <h3>🔌 Logisim / Logisim-evolution</h3>
+      <p>画门电路、ALU、寄存器、简单 CPU。适合验证“数据通路”和“控制器”到底怎么连。</p>
+      <p><a href="http://www.cburch.com/logisim/" target="_blank" rel="noopener">Logisim 官网</a></p>
+    </div>
+    <div class="card">
+      <h3>🧮 CPUlator</h3>
+      <p>在线 CPU 模拟器，支持 MIPS/RISC-V/ARM，能单步看寄存器、内存、流水线。适合理解指令执行和寻址。</p>
+      <p><a href="https://cpulator.01xz.net/" target="_blank" rel="noopener">cpulator.01xz.net</a></p>
+    </div>
+    <div class="card">
+      <h3>🔍 Compiler Explorer</h3>
+      <p>输入 C/C++，实时看编译后的汇编。适合对照第 4 章“高级语言 → 机器级代码”，看循环、数组、函数调用怎么变。</p>
+      <p><a href="https://godbolt.org/" target="_blank" rel="noopener">godbolt.org</a></p>
+    </div>
+    <div class="card">
+      <h3>🛠 MARS（MIPS Assembler and Runtime Simulator）</h3>
+      <p>经典 MIPS 模拟器，适合练汇编、看指令格式和寄存器变化。与 408 的 MIPS 风格题目兼容度高。</p>
+      <p><a href="https://dpetersanderson.github.io/" target="_blank" rel="noopener">MARS 下载页</a></p>
+    </div>
+    <div class="card">
+      <h3>🧱 Nand2Tetris 工具链</h3>
+      <p>从 HDL 到 CPU 模拟器，适合想亲手搭一个 CPU 的同学。投入较大，建议考后再玩。</p>
+      <p><a href="https://www.nand2tetris.org/software" target="_blank" rel="noopener">软件下载</a></p>
+    </div>
+    <div class="card">
+      <h3>📐 本站实验室</h3>
+      <p>浮点转换、补码溢出、Cache 映射、寻址计算、流水线时空图、总线带宽、中断/DMA 流程，全部浏览器内运行，无需安装。</p>
+      <p><a href="index.html#lab">从首页进入各章实验室</a></p>
+    </div>
+  </div>
+
+  <h2 class="sec" id="plan">五、不同阶段的搭配方案</h2>
+  <table class="tbl">
+    <tr><th>阶段</th><th>主线</th><th>题</th><th>工具</th><th>本站用法</th></tr>
+    <tr><td>一轮（8~10 周）</td><td>唐朔飞/袁春风 + 王道单科书</td><td>王道课后选择题</td><td>CPUlator 单步 1~2 次</td><td>每章读完后做章内题 + 玩实验室</td></tr>
+    <tr><td>二轮（6~8 周）</td><td>王道单科书 + 错题本</td><td>一轮错题 + 真题第一遍</td><td>Logisim 画数据通路</td><td>练习场按难度筛，错题重做三遍</td></tr>
+    <tr><td>三轮（4 周）</td><td>真题 + 记忆清单</td><td>整套计时 + 错题本</td><td>不需要新工具</td><td>只看错题/收藏，回章补概念</td></tr>
+  </table>
+
+  <h2 class="sec" id="rules">六、资源使用原则（防收集癖）</h2>
+  <div class="steps">
+    <div class="step"><b>一本主线教材 + 一套题 + 一个工具</b>，其余都是“查漏时再打开”。同时开三本书，等于三本都没读透。</div>
+    <div class="step"><b>网课不要替代做题</b>。看完一节立刻做 10 道对应选择题；不做题，视频只是“看过”。</div>
+    <div class="step"><b>模拟器只用来验证</b>，不要沉迷搭 CPU。408 考的是计算与流程，不是硬件工程。</div>
+    <div class="step"><b>真题不要提前刷完</b>。最近一年留到三轮最后，做一次真正干净的全真模拟。</div>
+    <div class="step"><b>资料以考纲为准</b>。超纲内容（如复杂流水线调度、具体主板电路）看不懂可以先跳过，不要因小失大。</div>
+  </div>
+
+  <div class="callout warn">
+    <div class="co-title">⚠️ 关于链接</div>
+    本站只提供资源名称与官方/通用入口，不存储、不代理任何版权资料。教材请购买正版，真题请使用正规出版社资料；网课链接可能随平台调整，若失效请按名称搜索。
+  </div>
+</div>
+
+<footer>
+  408 计算机组成原理可视化课堂 · 资源导航<br>
+  <div class="pagers"><a href="index.html">← 返回总览</a><a href="practice.html">去练习场 →</a><a href="method.html">备考方法论 →</a></div>
+</footer>
+<script src="assets/app.js?v=1"></script>
+</body>
+</html>
