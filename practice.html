@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>练习场 · 408 计算机组成原理可视化课堂</title>
+<meta name="description" content="408 计算机组成原理练习场：70 道分级题，按章节/难度筛选，自动错题本、收藏、随机抽题。">
+<link rel="stylesheet" href="assets/style.css?v=1">
+</head>
+<body>
+<nav class="topbar"><div class="topbar-inner">
+  <a class="logo" href="index.html"><span class="dot"></span>408 计组可视化课堂</a>
+  <div class="nav-links">
+    <a href="index.html">总览</a><a href="ch01.html">系统概述</a><a href="ch02.html">数据表示</a><a href="ch03.html">存储系统</a><a href="ch04.html">指令系统</a><a href="ch05.html">CPU</a><a href="ch06.html">总线</a><a href="ch07.html">I/O</a><a href="practice.html">练习场</a><a href="method.html">备考方法论</a><a href="resources.html">资源导航</a>
+  </div>
+  <button class="theme-btn" title="切换明暗主题">🌙</button>
+</div></nav>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="kicker">PRACTICE · 题库与错题本</span>
+    <h1>练习场 · 70 题跨章组卷</h1>
+    <p>全站题库共 <b data-bank-count>70</b> 道，覆盖 7 章、三个难度。顶部状态栏记录<b>已答 / 正确率 / 错题 / 收藏</b>，支持「只看错题」「只看收藏」「随机 20 题」；下方筛选栏可按章节和难度组卷。</p>
+    <p class="tagline">建议顺序：基础 → 提高 → 真题改编 → 随机 20 题。错题至少重做三遍。</p>
+    <div class="stats">
+      <div class="stat"><b>70</b><span>道分级题</span></div>
+      <div class="stat"><b>7</b><span>章全覆盖</span></div>
+      <div class="stat"><b>3</b><span>个难度档</span></div>
+      <div class="stat"><b>∞</b><span>次错题重做</span></div>
+    </div>
+  </div>
+
+  <div class="callout exam">
+    <div class="co-title">📌 怎么用这个练习场</div>
+    <b>① 先按章节筛：</b>刚学完哪章就筛哪章，趁热做；<b>② 再按难度筛：</b>基础正确率稳定在 80% 以上，再碰提高和真题改编；<b>③ 错题本：</b>答错自动收录，点“只看错题”重做，连续两次做对再放过；<b>④ 收藏：</b>典型题/易混题点右上角 ☆，考前只看收藏和错题。
+  </div>
+
+  <div class="grid cols-4" style="margin:18px 0">
+    <div class="card"><h3>🟢 基础卷</h3><p>概念辨析与直接套公式，目标是“不丢送分题”。筛选：难度 = 基础。</p></div>
+    <div class="card"><h3>🟡 提高卷</h3><p>多步计算与易混点，目标是“把选择压到 1 题以内”。筛选：难度 = 提高。</p></div>
+    <div class="card"><h3>🔴 真题卷</h3><p>真题风格与改编题，目标是熟悉命题口径。筛选：难度 = 真题改编。</p></div>
+    <div class="card"><h3>⚫ 随机卷</h3><p>点状态栏“随机 20 题”，防背题、练反应；错题仍会自动收录。</p></div>
+  </div>
+
+  <div class="callout warn">
+    <div class="co-title">⚠️ 做题姿势</div>
+    先自己在纸上写答案/算式，再点选项，最后提交看解析。<b>直接看解析 = 白做</b>。计算题要写“公式 + 代入 + 结果 + 单位”，不要只写一个数字。
+  </div>
+
+  <h2 class="sec">全部题目</h2>
+  <p class="muted">筛选条件会与顶部“只看错题/收藏/随机”互斥：切到错题本时，筛选暂时失效；点“显示全部”恢复当前筛选。</p>
+
+  <div data-quiz-bank></div>
+
+  <div class="callout ok" style="margin-top:26px">
+    <div class="co-title">✅ 刷完题之后</div>
+    回到对应章节，把错题涉及的概念重新读一遍，并在<a href="method.html">备考方法论</a>的“精确记忆清单”里打钩。错题不是用来“再做一遍”的，是用来“定位概念漏洞”的。
+  </div>
+</div>
+
+<footer>
+  408 计算机组成原理可视化课堂 · 练习场<br>
+  <div class="pagers"><a href="index.html">← 返回总览</a><a href="method.html">备考方法论 →</a><a href="resources.html">资源导航 →</a></div>
+</footer>
+<script src="assets/questions.js?v=1"></script>
+<script src="assets/app.js?v=1"></script>
+</body>
+</html>
