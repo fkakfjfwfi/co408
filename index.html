@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>408 计算机组成原理可视化课堂 · 从门电路到整机</title>
 <meta name="description" content="为 408 考研准备的计算机组成原理学习站：7 章知识体系、8 个交互实验室、70 道分级练习、备考方法论。">
-<link rel="stylesheet" href="assets/style.css?v=1">
+<link rel="stylesheet" href="assets/style.css?v=2">
 </head>
 <body>
 <nav class="topbar"><div class="topbar-inner">
@@ -25,6 +25,7 @@
     <div class="stats">
       <div class="stat"><b>7</b><span>章考纲全覆盖</span></div>
       <div class="stat"><b>8</b><span>个交互实验室</span></div>
+      <div class="stat"><b>31</b><span>张教学图解</span></div>
       <div class="stat"><b>70</b><span>道分级练习</span></div>
       <div class="stat"><b>1</b><span>套备考方法论</span></div>
     </div>
@@ -53,6 +54,14 @@
   <div class="callout exam">
     <div class="co-title">📌 408 计组的分值感</div>
     408 总分 150：数据结构 45 + 计算机组成原理 45 + 操作系统 35 + 计算机网络 25。计组通常 <b>11 道选择（22 分）+ 2 道综合题（约 23 分）</b>，是“选择决定下限、大题决定上限”的科目。具体题量每年略有浮动，但存储系统、CPU、数据表示三块始终是重心。
+  </div>
+
+  <div class="callout ok">
+    <div class="co-title">🧭 零基础先按这个顺序看（别一上来啃公式）</div>
+    <b>① 先看图：</b>每节开头/关键例子旁都有 SVG 图解，先看图注，知道“这东西长什么样”。<br>
+    <b>② 再看人话：</b>黄色“生活类比”框，把部件/流程换成日常场景；看不懂公式时先回到这里。<br>
+    <b>③ 再玩实验室：</b>改参数看结果，图会跟着变；比盯着公式推更直观。<br>
+    <b>④ 最后做题：</b>先做基础题，错题自动进错题本；一轮看不懂的“进阶深挖”可以留到二轮。
   </div>
 
   <h2 class="sec">知识体系总览 · 计算机组成原理篇</h2>
@@ -131,6 +140,24 @@
     <tr><td>Cache 缺失</td><td>缺页</td><td>Cache 没命中，去主存取块；页不在主存，要去磁盘调页，代价差几个数量级</td></tr>
     <tr><td>中断</td><td>DMA</td><td>中断让 CPU 来处理事件；DMA 让控制器直接搬数据块，CPU 只在首尾参与</td></tr>
     <tr><td>同步定时</td><td>异步定时</td><td>统一时钟、快但挑设备 / 握手信号、慢但适应性强</td></tr>
+  </table>
+
+  <h2 class="sec">📖 零基础术语速查（先混个脸熟）</h2>
+  <p class="muted">第一遍不需要背，看到词知道大概在说什么就够；二轮再回来逐条精确化。</p>
+  <table class="tbl">
+    <tr><th>术语</th><th>一句话人话</th><th>在哪一章</th></tr>
+    <tr><td>冯·诺依曼结构</td><td>程序和数据都放进同一个存储器，CPU 按顺序取指执行</td><td><a href="ch01.html">第 1 章</a></td></tr>
+    <tr><td>CPI</td><td>平均每条指令要花几个时钟周期，越小越快</td><td><a href="ch01.html#s4">第 1 章</a></td></tr>
+    <tr><td>补码</td><td>让减法能直接用加法器算的编码，0 只有一种写法</td><td><a href="ch02.html#s2">第 2 章</a></td></tr>
+    <tr><td>IEEE 754</td><td>浮点数的“通用包装”：符号 + 阶码 + 尾数</td><td><a href="ch02.html#s4">第 2 章</a></td></tr>
+    <tr><td>海明码</td><td>加几位校验位，能指出 1 位错在哪</td><td><a href="ch02.html#s6">第 2 章</a></td></tr>
+    <tr><td>Cache</td><td>CPU 手边的小仓库，放最近常用的数据块</td><td><a href="ch03.html#s4">第 3 章</a></td></tr>
+    <tr><td>TLB</td><td>页表项的“快表”，加速虚拟地址转换</td><td><a href="ch03.html#s5">第 3 章</a></td></tr>
+    <tr><td>寻址方式</td><td>指令里怎么指出“操作数在哪”</td><td><a href="ch04.html#s3">第 4 章</a></td></tr>
+    <tr><td>流水线</td><td>多条指令像洗车一样分站同时推进</td><td><a href="ch05.html#s5">第 5 章</a></td></tr>
+    <tr><td>冒险</td><td>流水线里“抢资源 / 等结果 / 猜错路”的冲突</td><td><a href="ch05.html#s5">第 5 章</a></td></tr>
+    <tr><td>微程序</td><td>用更底层的微指令序列去实现一条机器指令</td><td><a href="ch05.html#s4">第 5 章</a></td></tr>
+    <tr><td>中断 / DMA</td><td>设备举手找 CPU / DMA 控制器直接搬数据块</td><td><a href="ch07.html">第 7 章</a></td></tr>
   </table>
 
   <div class="callout ok">
