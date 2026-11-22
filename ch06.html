@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 6 章 总线 · 408 计算机组成原理可视化课堂</title>
+<meta name="description" content="408 计算机组成原理第 6 章：总线分类、带宽计算、同步/异步定时、总线仲裁、PCIe 与串行总线，附带宽计算实验室。">
+<link rel="stylesheet" href="assets/style.css?v=1">
+</head>
+<body>
+<nav class="topbar"><div class="topbar-inner">
+  <a class="logo" href="index.html"><span class="dot"></span>408 计组可视化课堂</a>
+  <div class="nav-links">
+    <a href="index.html">总览</a><a href="ch01.html">系统概述</a><a href="ch02.html">数据表示</a><a href="ch03.html">存储系统</a><a href="ch04.html">指令系统</a><a href="ch05.html">CPU</a><a href="ch06.html">总线</a><a href="ch07.html">I/O</a><a href="practice.html">练习场</a><a href="method.html">备考方法论</a><a href="resources.html">资源导航</a>
+  </div>
+  <button class="theme-btn" title="切换明暗主题">🌙</button>
+</div></nav>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="kicker">CHAPTER 06 · 总线</span>
+    <h1>第 6 章 · 所有部件共享的那束“电线”</h1>
+    <p>总线是计算机各部件的公共通信干线。它看起来只是“一组线”，但带宽、定时、仲裁每一个选择都会影响整机性能。408 在这一章以选择题为主，<b>带宽计算和同步/异步定时</b>是高频点。</p>
+    <p class="tagline">预计 2~3 小时 · 1 个带宽实验室 · 8 道分级练习 · 选择题为主</p>
+    <div class="stats">
+      <div class="stat"><b>3</b><span>系统总线三类</span></div>
+      <div class="stat"><b>3</b><span>集中式仲裁方式</span></div>
+      <div class="stat"><b>2×</b><span>DDR 每周期传输次数</span></div>
+    </div>
+  </div>
+
+  <div class="toc"><span class="toc-label">本页导航</span><a href="#goal">学习目标</a><a href="#s1">总线分类</a><a href="#s2">性能与带宽</a><a href="#lab">带宽实验室</a><a href="#s3">事务与定时</a><a href="#s4">仲裁</a><a href="#s5">常见总线</a><a href="#deep">进阶</a><a href="#pit">避坑</a><a href="#quiz">练习</a><a href="#ck">打卡</a></div>
+
+  <div class="callout exam" id="goal"><div class="co-title">🎯 学习目标（学完你应该能）</div>
+  ① 说出数据/地址/控制总线的方向、宽度和作用；<br>
+  ② 用“宽度 × 频率 × 每周期传输次数”算总线带宽；<br>
+  ③ 比较同步、异步、半同步定时，说出各自适用场景；<br>
+  ④ 说出链式查询、计数器定时查询、独立请求三种仲裁方式的优缺点；<br>
+  ⑤ 解释为什么高速串行总线（PCIe）反而比并行总线快。</div>
+
+  <h2 class="sec" id="s1">6.1 总线分类：先看它连接谁</h2>
+  <div class="callout life"><div class="co-title">🛣️ 生活类比</div>
+  总线像<b>城市道路</b>：数据总线是车道（一次能过几辆车），地址总线是门牌号（去哪），控制总线是红绿灯和交通规则（什么时候能走）。道路越宽、限速越高，单位时间通过的车辆越多。</div>
+
+  <table class="tbl">
+    <tr><th>分类角度</th><th>类型</th><th>说明</th></tr>
+    <tr><td>所处位置</td><td>片内总线 / 系统总线 / 通信总线</td><td>芯片内部、计算机各插件板之间、计算机与外部设备之间</td></tr>
+    <tr><td>传输方式</td><td>串行总线 / 并行总线</td><td>一位一位传 / 多位同时传</td></tr>
+    <tr><td>定时方式</td><td>同步总线 / 异步总线</td><td>统一时钟 / 握手信号</td></tr>
+    <tr><td>功能</td><td>数据总线 / 地址总线 / 控制总线</td><td>系统总线的三部分</td></tr>
+  </table>
+
+  <h3 class="sub">系统总线的三部分</h3>
+  <table class="tbl">
+    <tr><th>总线</th><th>方向</th><th>作用</th><th>宽度决定</th></tr>
+    <tr><td>数据总线</td><td>双向</td><td>传送指令、数据、状态</td><td>一次传输的位数，影响带宽</td></tr>
+    <tr><td>地址总线</td><td>单向（主 → 从）</td><td>选中主存单元或 I/O 端口</td><td>可寻址空间（2ⁿ）</td></tr>
+    <tr><td>控制总线</td><td>方向各异</td><td>读/写、中断、总线请求/应答、时钟等</td><td>控制信号的种类</td></tr>
+  </table>
+  <p><b>总线结构</b>有单总线、双总线、三总线等。单总线结构简单、成本低，但所有部件共享一条通路，容易成为瓶颈；现代高性能计算机常用多级总线/点对点互连（如 CPU 与内存、PCIe 设备分别连接）。</p>
+
+  <h2 class="sec" id="s2">6.2 性能指标：带宽怎么算</h2>
+  <div class="formula">
+    总线带宽 = 总线宽度（字节）× 总线频率 × 每时钟周期传输次数<br>
+    = (总线位数 / 8) × f × n
+  </div>
+  <p>例：32 位宽、100 MHz、每周期传 1 次 → (32/8) × 100×10⁶ = 400 MB/s。若为 DDR，每周期传 2 次 → 800 MB/s。</p>
+  <table class="tbl">
+    <tr><th>指标</th><th>含义</th><th>注意</th></tr>
+    <tr><td>总线宽度</td><td>数据线位数</td><td>不是地址线位数</td></tr>
+    <tr><td>总线频率</td><td>时钟频率</td><td>DDR 的有效传输频率是时钟频率的 2 倍</td></tr>
+    <tr><td>传输周期</td><td>一次总线事务的时间</td><td>可能包含地址、数据多个时钟</td></tr>
+    <tr><td>带宽</td><td>单位时间传输的数据量</td><td>MB/s 或 GB/s；注意十进制/二进制换算</td></tr>
+  </table>
+
+  <div class="lab" id="lab-bus">
+    <div class="lab-title">🔬 实验室 · 总线带宽计算器</div>
+    <div class="lab-desc">调宽度、频率、每周期传输次数，看带宽和传输指定字节数所需时间。</div>
+    <div class="lab-stage">
+      <div class="lab-ctrl">
+        <label class="lab-field">总线宽度 (位)<input id="bus-width" type="number" value="32" min="1" step="8"></label>
+        <label class="lab-field">频率 (MHz)<input id="bus-freq" type="number" value="100" min="1"></label>
+        <label class="lab-field">每周期传输次数<select id="bus-trans"><option value="1">1 次（SDR）</option><option value="2">2 次（DDR）</option><option value="4">4 次（QDR）</option></select></label>
+        <label class="lab-field">传输字节数<input id="bus-bytes" type="number" value="1024" min="1"></label>
+        <button id="bus-go" type="button">计算</button>
+      </div>
+      <div class="lab-out" id="bus-out"></div>
+    </div>
+    <div class="lab-note" id="bus-note"></div>
+  </div>
+
+  <h2 class="sec" id="s3">6.3 总线事务与定时</h2>
+  <p>一次总线事务通常包括：<b>请求 → 仲裁 → 寻址 → 传输 → 结束</b>。主设备提出请求，仲裁器决定谁先用总线，然后发出地址选中从设备，完成一个或多个数据 beat，最后释放总线。</p>
+
+  <h3 class="sub">同步定时 vs 异步定时</h3>
+  <table class="tbl">
+    <tr><th>维度</th><th>同步定时</th><th>异步定时</th></tr>
+    <tr><td>协调方式</td><td>统一时钟，所有设备按节拍动作</td><td>请求/应答握手，按事件先后动作</td></tr>
+    <tr><td>速度</td><td>快，协议简单</td><td>较慢，握手有开销</td></tr>
+    <tr><td>适应性</td><td>差，慢设备拖累整体</td><td>好，可兼容不同速度设备</td></tr>
+    <tr><td>成本</td><td>低</td><td>较高（控制线多、逻辑复杂）</td></tr>
+    <tr><td>典型</td><td>CPU 内部总线、PCI</td><td>部分外设总线、老式异步总线</td></tr>
+  </table>
+  <p><b>异步握手的三种方式：</b></p>
+  <table class="tbl">
+    <tr><th>方式</th><th>请求方</th><th>应答方</th><th>可靠性/速度</th></tr>
+    <tr><td>不互锁</td><td>发请求后不等应答，过一段时间撤销</td><td>收到请求后发应答，过一段时间撤销</td><td>最快，可靠性最低</td></tr>
+    <tr><td>半互锁</td><td>等到应答才撤销请求</td><td>发应答后不等请求撤销</td><td>中等</td></tr>
+    <tr><td>全互锁</td><td>等到应答才撤销请求</td><td>等到请求撤销才撤销应答</td><td>最可靠，最慢</td></tr>
+  </table>
+  <p><b>半同步定时</b>是折中：平时按同步时钟传输，慢设备可以通过“等待（WAIT）”信号插入等待周期，兼顾速度与适应性。</p>
+  <p><b>分离事务</b>：主设备发出读请求后立即释放总线，从设备准备好数据后再申请总线传回。这样总线在等待期间可以服务其他设备，提高利用率，但协议更复杂。</p>
+
+  <h2 class="sec" id="s4">6.4 总线仲裁：谁先用</h2>
+  <p>多个主设备同时请求总线时，需要仲裁器决定先后。集中式仲裁有三种经典方式：</p>
+  <table class="tbl">
+    <tr><th>方式</th><th>原理</th><th>优点</th><th>缺点</th></tr>
+    <tr><td>链式查询（菊花链）</td><td>请求线共用，应答沿设备链依次传递</td><td>线少、结构简单、易扩展</td><td>优先级固定（近端优先），一处故障影响后续</td></tr>
+    <tr><td>计数器定时查询</td><td>仲裁器用计数器轮询设备编号</td><td>优先级可编程，较公平</td><td>需要 log₂n 根设备线，速度较慢</td></tr>
+    <tr><td>独立请求</td><td>每个设备有独立的请求/应答线</td><td>响应快，优先级灵活</td><td>线多，成本高</td></tr>
+  </table>
+  <p><b>分布式仲裁</b>没有中央仲裁器，各设备通过共享的优先级编码/冲突检测自行决定，可靠性高但协议复杂。</p>
+
+  <h2 class="sec" id="s5">6.5 常见总线：为什么串行反而快</h2>
+  <table class="tbl">
+    <tr><th>总线</th><th>类型</th><th>特点</th></tr>
+    <tr><td>ISA</td><td>并行系统总线</td><td>早期 PC 总线，已淘汰</td></tr>
+    <tr><td>PCI</td><td>并行系统总线</td><td>共享总线，支持即插即用</td></tr>
+    <tr><td>PCIe</td><td>高速串行点对点</td><td>差分信号、多 lane 聚合、全双工，现代主流</td></tr>
+    <tr><td>USB</td><td>串行外设总线</td><td>主从结构、热插拔、供电</td></tr>
+    <tr><td>SATA</td><td>串行存储总线</td><td>点对点连接磁盘/SSD</td></tr>
+  </table>
+  <div class="callout exam"><div class="co-title">📌 串行的逆袭</div>
+  并行总线一次传多位，看似更快，但频率提高后会出现<b>时钟偏斜、串扰、同步困难</b>，线越多越难提速。串行总线线少、差分抗干扰、容易提高频率，再通过多通道（lane）聚合，总带宽反而超过并行总线。PCIe 就是典型例子。</div>
+
+  <h2 class="sec" id="deep">🚀 进阶深挖（教材级）</h2>
+  <h3 class="sub">深挖 1 · 总线带宽的“有效值”</h3>
+  <p>理论带宽 = 宽度 × 频率 × 次数，但实际有效带宽要扣除地址周期、仲裁、等待、协议开销。例如一个总线事务包含 1 个地址周期 + 4 个数据周期，则有效带宽只有理论值的 4/5。题目若给“每个事务的地址/数据周期数”，要按事务算。</p>
+
+  <h3 class="sub">深挖 2 · 总线复用的取舍</h3>
+  <p>地址/数据复用减少线数，但同一组线不能同时传地址和数据，需要分时，可能降低吞吐；同时增加控制逻辑。适合引脚受限的芯片，不一定适合追求极致带宽的系统总线。</p>
+
+  <h3 class="sub">深挖 3 · 总线与存储层次的关系</h3>
+  <p>CPU 与主存之间的总线带宽必须匹配 Cache 缺失率。若缺失率高，总线会成为瓶颈；多体交叉、宽总线、多通道内存都是为了提高这条通路的带宽。分析性能时，别只盯 CPU 主频，要看“数据能不能及时送到”。</p>
+
+  <div class="callout views"><div class="co-title">🌐 多源视角</div>
+  <ul>
+    <li><b>【唐朔飞】</b>把总线分为片内、系统、通信三级，系统总线再分数据/地址/控制。本站用法：先判断题目说的是哪一级总线，再谈方向与宽度。</li>
+    <li><b>【CSAPP】</b>用“I/O 总线 + 内存总线”讲系统互连，强调带宽与延迟。本站用法：算带宽时区分“理论峰值”和“实际有效”。</li>
+    <li><b>【PCIe 规范】</b>用 lane、差分、事务层/数据链路层/物理层描述串行互连。本站用法：记住“串行 + 多 lane + 全双工”三个关键词即可应对选择题。</li>
+  </ul>
+  <div class="src">参考：唐朔飞《计算机组成原理》第 10 章；CSAPP 第 6 章；PCIe 基础规范。</div></div>
+
+  <h2 class="sec" id="pit">⚠️ 本章避坑清单</h2>
+  <div class="steps">
+    <div class="step">地址总线单向、数据总线双向；控制总线方向不统一，不要一概说“双向”。</div>
+    <div class="step">带宽公式里用的是“字节宽度”，不是“位宽度”；32 位 = 4 B，别忘除以 8。</div>
+    <div class="step">DDR 每周期传 2 次，有效传输频率是时钟频率的 2 倍；不要把 100 MHz 直接当 200 MHz 带宽算完又乘 2 两次。</div>
+    <div class="step">同步定时快但适应慢设备差；异步握手灵活但有开销。不要反着选。</div>
+    <div class="step">链式查询的优先级由物理位置决定，不是可编程的；计数器定时查询才较灵活。</div>
+    <div class="step">并行总线不一定比串行快；高频下串行差分 + 多 lane 更有优势。</div>
+  </div>
+
+  <h2 class="sec" id="quiz">📝 章内练习（<span data-quiz-count>8</span> 题 · 基础 → 提高 → 真题改编）</h2>
+  <p class="muted">带宽计算、定时方式、仲裁、串行/并行是重点。</p>
+  <div data-quiz-ch="6"></div>
+
+  <h2 class="sec" id="ck">✅ 本章打卡</h2>
+  <div data-ck-scope>
+    <p><span class="progress-pill">0 / 4 已打卡</span></p>
+    <div class="checklist">
+      <label class="check-item" data-ck="c6-1"><input type="checkbox"><span>能说出数据/地址/控制总线的方向、作用、宽度含义</span></label>
+      <label class="check-item" data-ck="c6-2"><input type="checkbox"><span>能独立算 SDR/DDR 总线带宽，并换算传输时间</span></label>
+      <label class="check-item" data-ck="c6-3"><input type="checkbox"><span>能比较同步/异步/半同步定时，说出全互锁握手过程</span></label>
+      <label class="check-item" data-ck="c6-4"><input type="checkbox"><span>能说出三种集中式仲裁的优缺点，解释串行总线为什么快</span></label>
+    </div>
+  </div>
+</div>
+
+<footer>
+  408 计算机组成原理可视化课堂 · 基础教学 + 交互实验室 + 分级题库<br>
+  <div class="pagers"><a href="ch05.html">← 第 5 章 CPU</a><a href="ch07.html">第 7 章 I/O →</a><a href="practice.html">去练习场 →</a></div>
+</footer>
+<script src="assets/questions.js?v=1"></script>
+<script src="assets/app.js?v=1"></script>
+<script src="assets/labs.js?v=1"></script>
+</body>
+</html>
