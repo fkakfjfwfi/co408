@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 5 章 中央处理器 · 408 计算机组成原理可视化课堂</title>
+<meta name="description" content="408 计算机组成原理第 5 章：CPU 结构、指令周期、数据通路、硬布线与微程序控制器、五段流水线与三类冒险，附流水线时空图实验室。">
+<link rel="stylesheet" href="assets/style.css?v=1">
+</head>
+<body>
+<nav class="topbar"><div class="topbar-inner">
+  <a class="logo" href="index.html"><span class="dot"></span>408 计组可视化课堂</a>
+  <div class="nav-links">
+    <a href="index.html">总览</a><a href="ch01.html">系统概述</a><a href="ch02.html">数据表示</a><a href="ch03.html">存储系统</a><a href="ch04.html">指令系统</a><a href="ch05.html">CPU</a><a href="ch06.html">总线</a><a href="ch07.html">I/O</a><a href="practice.html">练习场</a><a href="method.html">备考方法论</a><a href="resources.html">资源导航</a>
+  </div>
+  <button class="theme-btn" title="切换明暗主题">🌙</button>
+</div></nav>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="kicker">CHAPTER 05 · 中央处理器</span>
+    <h1>第 5 章 · 指令在这里变成电信号</h1>
+    <p>CPU 是计组的“心脏”：<b>取指、译码、执行、访存、写回</b>，每一步都要有数据通路和控制信号配合。这一章的重点不是背框图，而是能沿着一条指令走完整个数据通路，并能画流水线时空图。</p>
+    <p class="tagline">预计 5~6 小时 · 1 个流水线实验室 · 10 道分级练习 · 大题高频</p>
+    <div class="stats">
+      <div class="stat"><b>4</b><span>指令周期阶段</span></div>
+      <div class="stat"><b>5</b><span>经典流水线段数</span></div>
+      <div class="stat"><b>3</b><span>流水线冒险类型</span></div>
+    </div>
+  </div>
+
+  <div class="toc"><span class="toc-label">本页导航</span><a href="#goal">学习目标</a><a href="#s1">CPU 结构</a><a href="#s2">指令周期</a><a href="#s3">数据通路</a><a href="#s4">控制器</a><a href="#s5">流水线</a><a href="#lab">流水线实验室</a><a href="#s6">多核</a><a href="#deep">进阶</a><a href="#pit">避坑</a><a href="#quiz">练习</a><a href="#ck">打卡</a></div>
+
+  <div class="callout exam" id="goal"><div class="co-title">🎯 学习目标（学完你应该能）</div>
+  ① 说出 PC、IR、MAR、MDR、ACC、PSW 的作用，画出取指数据流；<br>
+  ② 区分取指、间址、执行、中断四个周期，知道每个周期访存做什么；<br>
+  ③ 比较硬布线与微程序控制器，说出微指令的两种格式和编码方式；<br>
+  ④ 画五段流水线时空图，算总周期、吞吐率、加速比、效率；<br>
+  ⑤ 判断结构/数据/控制冒险，并说出至少两种解决方法；<br>
+  ⑥ 沿单总线数据通路写出“ADD R1,R2”这类指令的微操作序列。</div>
+
+  <h2 class="sec" id="s1">5.1 CPU 结构：运算器 + 控制器 + 寄存器</h2>
+  <div class="callout life"><div class="co-title">🏭 生活类比</div>
+  CPU 像一座工厂：<b>运算器</b>是车间，<b>控制器</b>是调度室，<b>寄存器</b>是手边的小料盒，<b>Cache/主存</b>是仓库。调度室按订单（指令）发工单（控制信号），车间从料盒取料加工，成品再放回料盒或仓库。</div>
+
+  <h3 class="sub">运算器</h3>
+  <table class="tbl">
+    <tr><th>部件</th><th>作用</th><th>备注</th></tr>
+    <tr><td>ALU</td><td>算术/逻辑运算</td><td>加减、与或非、移位、比较</td></tr>
+    <tr><td>ACC</td><td>累加器</td><td>存放一个操作数或结果</td></tr>
+    <tr><td>MQ / X</td><td>乘商寄存器 / 操作数寄存器</td><td>乘除法时配合 ALU</td></tr>
+    <tr><td>通用寄存器</td><td>存放操作数/地址</td><td>R0~Rn，减少访存</td></tr>
+    <tr><td>PSW</td><td>程序状态字</td><td>ZF、SF、OF、CF、中断允许位等</td></tr>
+  </table>
+
+  <h3 class="sub">控制器与关键寄存器</h3>
+  <table class="tbl">
+    <tr><th>寄存器</th><th>作用</th><th>易错点</th></tr>
+    <tr><td>PC</td><td>下一条指令地址</td><td>取指后按指令长度更新</td></tr>
+    <tr><td>IR</td><td>当前指令</td><td>操作码送译码器，地址码送地址形成部件</td></tr>
+    <tr><td>MAR</td><td>主存地址</td><td>位数决定寻址空间</td></tr>
+    <tr><td>MDR</td><td>主存数据</td><td>与总线/存储字长相关</td></tr>
+    <tr><td>时序系统</td><td>产生时钟/节拍</td><td>控制微操作按时间顺序执行</td></tr>
+  </table>
+  <p>CPU 与主存之间通过<b>地址总线、数据总线、控制总线</b>连接。MAR 的输出接地址总线，MDR 与数据总线双向连接；控制总线传送读/写、中断、总线请求等信号。</p>
+
+  <h2 class="sec" id="s2">5.2 指令周期：一条指令的四个阶段</h2>
+  <div class="formula">
+    指令周期 = 取指周期 +（间址周期）+ 执行周期 +（中断周期）
+  </div>
+  <p>括号表示可选：只有间接寻址才需要间址周期；只有响应中断时才进入中断周期。每个周期又由若干机器周期/时钟周期组成。</p>
+
+  <table class="tbl">
+    <tr><th>阶段</th><th>主要动作</th><th>访存</th><th>结束时</th></tr>
+    <tr><td>取指（IF）</td><td>PC→MAR，读主存，MDR→IR，PC 更新</td><td>读指令</td><td>IR 中有了指令</td></tr>
+    <tr><td>间址（IND）</td><td>按 IR 的地址字段读主存，得到有效地址</td><td>读 EA</td><td>地址寄存器/暂存器有了 EA</td></tr>
+    <tr><td>执行（EX）</td><td>取操作数、运算、写回；或计算转移地址</td><td>可能读/写数据</td><td>结果写回，或 PC 改变</td></tr>
+    <tr><td>中断（INT）</td><td>保存断点，转中断服务程序</td><td>保存现场</td><td>进入服务程序</td></tr>
+  </table>
+  <div class="callout exam"><div class="co-title">📌 取指的“PC+1”到底加多少</div>
+  取指后 PC 加的是<b>一条指令的长度</b>。若指令字长 = 存储字长 = 1 个字，且按字编址，才是 PC+1；若指令字长 32 位、按字节编址，则是 PC+4。题目常在这里设陷阱。</div>
+
+  <h2 class="sec" id="s3">5.3 数据通路：控制信号指挥的“交通网”</h2>
+  <p>数据通路是寄存器、ALU、存储器之间传送数据的路径。按总线数量可分为单总线、双总线、三总线结构。单总线结构同一时刻只能有一个数据传送，因此一条指令需要多个时钟周期；多总线可以并行传送，速度更快但成本更高。</p>
+
+  <h3 class="sub">单总线结构下的一条加法指令</h3>
+  <pre class="code">// 指令：ADD R1, R2   （R1 ← R1 + R2）
+// 取指周期
+PC → MAR
+M(MAR) → MDR
+MDR → IR
+PC + 1 → PC
+
+// 执行周期（单总线，分步）
+R1 → A          // 操作数 1 送 ALU 的 A 端
+R2 → B          // 操作数 2 送 ALU 的 B 端
+A + B → R1      // ALU 结果写回 R1</pre>
+  <p>每一步都需要控制器发出对应的控制信号（如 <code class="inline">PCout、MARin、MemR、MDRout、IRin</code>）。数据通路大题常要求你写出微操作序列并标注控制信号，答题时按“取指—取数—运算—写回”分段，不要漏掉 PC 更新。</p>
+
+  <h3 class="sub">取指阶段的统一性</h3>
+  <p>无论什么指令，取指阶段的数据流都一样：<b>PC → MAR → 主存 → MDR → IR</b>。这是控制器设计的基础：取指微程序可以被所有指令共享。执行阶段才根据操作码走不同分支。</p>
+
+  <h2 class="sec" id="s4">5.4 控制器：硬布线 vs 微程序</h2>
+  <table class="tbl">
+    <tr><th>维度</th><th>硬布线控制器</th><th>微程序控制器</th></tr>
+    <tr><td>实现</td><td>组合逻辑电路直接产生控制信号</td><td>控制信号以微指令形式存放在控制存储器</td></tr>
+    <tr><td>速度</td><td>快</td><td>较慢（要取微指令）</td></tr>
+    <tr><td>设计/修改</td><td>复杂，修改困难</td><td>规整，易修改/扩展指令</td></tr>
+    <tr><td>适用</td><td>RISC、简单指令集</td><td>CISC、复杂指令集</td></tr>
+    <tr><td>典型</td><td>定长指令、流水线 CPU</td><td>x86 风格的复杂指令</td></tr>
+  </table>
+
+  <h3 class="sub">微程序控制器的核心概念</h3>
+  <div class="steps">
+    <div class="step"><b>微命令：</b>控制部件发出的最小控制信号，如“打开 PC 输出门”。</div>
+    <div class="step"><b>微操作：</b>微命令执行的具体动作，如“PC 内容送总线”。</div>
+    <div class="step"><b>微指令：</b>若干微命令的组合，格式通常为“控制字段 + 下地址字段”。</div>
+    <div class="step"><b>微程序：</b>完成一条机器指令的微指令序列，存放在控制存储器（CM）中。</div>
+    <div class="step"><b>微地址：</b>下一条微指令在 CM 中的地址，可由下地址字段、操作码映射或断定方式产生。</div>
+  </div>
+
+  <h3 class="sub">微指令的两种格式</h3>
+  <table class="tbl">
+    <tr><th>类型</th><th>特点</th><th>优点</th><th>缺点</th></tr>
+    <tr><td>水平型微指令</td><td>一次可并行发出多个微命令，字长长</td><td>并行能力强、微程序短、执行快</td><td>微指令字长，控制存储器容量大</td></tr>
+    <tr><td>垂直型微指令</td><td>类似机器指令，一次控制少量微操作，字短</td><td>微指令短、规整</td><td>并行性差、微程序长</td></tr>
+  </table>
+
+  <h3 class="sub">微命令编码</h3>
+  <table class="tbl">
+    <tr><th>方式</th><th>做法</th><th>特点</th></tr>
+    <tr><td>直接编码</td><td>每一位对应一个微命令</td><td>速度快，但字长长</td></tr>
+    <tr><td>字段直接编码</td><td>互斥微命令放同一字段，译码后产生</td><td>缩短字长，需译码时间</td></tr>
+    <tr><td>字段间接编码</td><td>一个字段的含义由另一个字段解释</td><td>进一步缩短字长，控制更复杂</td></tr>
+  </table>
+  <p><b>互斥性</b>是字段划分的关键：同一字段里的微命令不能同时有效，否则译码后无法区分。例如“读寄存器”和“写寄存器”可以放在不同字段，因为它们可能同时需要；而“PC 输出”和“R1 输出”如果都接到同一总线，就应放在同一字段互斥。</p>
+
+  <h2 class="sec" id="s5">5.5 流水线：让多条指令同时在路上</h2>
+  <div class="callout life"><div class="co-title">🏭 生活类比</div>
+  流水线像<b>洗车</b>：喷水、打泡、擦洗、冲净、烘干五个工位。第一辆车在打泡时，第二辆车已经在喷水。虽然每辆车仍要经过五道工序，但整体每小时能洗更多车。</div>
+
+  <p>经典五段流水线：</p>
+  <table class="tbl">
+    <tr><th>段</th><th>名称</th><th>主要工作</th></tr>
+    <tr><td>IF</td><td>取指</td><td>按 PC 读指令，PC 更新</td></tr>
+    <tr><td>ID</td><td>译码/读寄存器</td><td>译码，读通用寄存器，计算立即数</td></tr>
+    <tr><td>EX</td><td>执行</td><td>ALU 运算，计算有效地址</td></tr>
+    <tr><td>MEM</td><td>访存</td><td>读/写数据存储器</td></tr>
+    <tr><td>WB</td><td>写回</td><td>结果写回寄存器</td></tr>
+  </table>
+
+  <p>设流水线有 k 段，执行 n 条指令，每段耗时 Δt，且无冒险，则：</p>
+  <div class="formula">
+    总时间 T = (k + n − 1) × Δt<br>
+    吞吐率 TP = n / T<br>
+    加速比 S = nk / (k + n − 1)<br>
+    效率 E = S / k = n / (k + n − 1)
+  </div>
+  <p>当 n → ∞ 时，S → k，E → 1。流水线的理论上限是“k 倍”，实际会被冒险、流水线寄存器开销、时钟偏斜拉低。</p>
+
+  <div class="lab" id="lab-pipe">
+    <div class="lab-title">🔬 实验室 · 流水线时空图</div>
+    <div class="lab-desc">设置指令条数，生成五段流水线时空图；勾选“插入 2 个停顿”，观察总周期与加速比的变化。</div>
+    <div class="lab-stage">
+      <div class="lab-ctrl">
+        <label class="lab-field">指令条数 n<input id="pipe-n" type="number" value="8" min="1" max="12"></label>
+        <label class="lab-field">时钟周期 (ns)<input id="pipe-cycle" type="number" value="1" step="0.1" min="0.1"></label>
+        <label class="lab-field" style="flex-direction:row;align-items:center;gap:6px">停顿<input id="pipe-stall" type="checkbox"></label>
+        <button id="pipe-go" type="button">生成时空图</button>
+      </div>
+      <div id="pipe-out"></div>
+    </div>
+    <div class="lab-note" id="pipe-note"></div>
+  </div>
+
+  <h3 class="sub">三类冒险与解决办法</h3>
+  <table class="tbl">
+    <tr><th>冒险</th><th>原因</th><th>典型例子</th><th>解决办法</th></tr>
+    <tr><td><b>结构冒险</b></td><td>多条指令争用同一硬件资源</td><td>IF 和 MEM 同时访问统一 Cache；寄存器文件端口不够</td><td>分离 I/D Cache；增加端口；停顿</td></tr>
+    <tr><td><b>数据冒险</b></td><td>后一条指令依赖前一条尚未写回的结果</td><td><code class="inline">add r1,r2,r3</code> 后紧跟 <code class="inline">sub r4,r1,r5</code></td><td>转发/旁路；停顿；编译器调度；寄存器重命名</td></tr>
+    <tr><td><b>控制冒险</b></td><td>分支指令改变 PC，下一条指令不确定</td><td><code class="inline">beq</code>、<code class="inline">jmp</code>、函数返回</td><td>分支预测；延迟槽；提前计算目标地址；BTB</td></tr>
+  </table>
+  <div class="callout warn"><div class="co-title">⚠️ load-use 冒险：转发也不够</div>
+  <code class="inline">lw r1, 0(r2)</code> 后紧跟 <code class="inline">add r3, r1, r4</code>：load 的数据要到 MEM 段末才可用，而 add 在 EX 段就需要，即使有转发也必须<b>停顿 1 个周期</b>。这是考试常考的“转发不能完全消除的冒险”。</div>
+
+  <h3 class="sub">流水线进阶概念</h3>
+  <table class="tbl">
+    <tr><th>概念</th><th>含义</th></tr>
+    <tr><td>超标量（superscalar）</td><td>每个时钟周期发射多条指令，需要多个功能部件和更复杂的调度</td></tr>
+    <tr><td>超流水（superpipelining）</td><td>把每段再细分，提高时钟频率，但冒险/开销增加</td></tr>
+    <tr><td>动态调度/乱序执行</td><td>硬件在运行时调整指令顺序，减少停顿；需要重排序缓冲保证提交顺序</td></tr>
+    <tr><td>寄存器重命名</td><td>消除假数据依赖（WAR/WAW），让更多指令并行</td></tr>
+  </table>
+
+  <h2 class="sec" id="s6">5.6 多核与多处理器（概念）</h2>
+  <p>多核处理器把多个 CPU 核集成在一个芯片上，共享 L3 Cache 和主存。核间通过共享存储或消息传递通信；共享数据需要<b>缓存一致性</b>协议（如 MESI）保证各核看到的值一致。408 对多核的要求以概念为主：能说出“多核并行、共享 Cache、一致性、核间同步”即可。</p>
+
+  <h2 class="sec" id="deep">🚀 进阶深挖（教材级）</h2>
+  <h3 class="sub">深挖 1 · 单总线数据通路的微操作序列</h3>
+  <p>单总线结构中，每个时钟周期只能有一个部件把数据放到总线上。写微操作序列时遵循：<b>源部件 out、目的部件 in、ALU 功能选择、存储器读/写</b>四类信号。以 <code class="inline">ADD R1, R2</code> 为例：</p>
+  <pre class="code">T1: PCout, MARin, PC+1
+T2: MemR, MDRin
+T3: MDRout, IRin
+T4: R1out, Ain
+T5: R2out, Bin
+T6: ALUadd, R1in</pre>
+  <p>实际题目可能要求把取指和执行合并到若干机器周期，按题目给出的节拍写，不要机械套用。</p>
+
+  <h3 class="sub">深挖 2 · 微程序的执行过程</h3>
+  <p>取机器指令 → 操作码映射到微程序入口 → 从 CM 取微指令 → 微指令的控制字段产生微命令 → 下地址字段/断定逻辑产生下一条微地址 → 重复直到微程序结束 → 取下一条机器指令。微程序控制器也需要“取微指令—执行”的循环，只是它的“指令”更底层。</p>
+
+  <h3 class="sub">深挖 3 · 流水线性能的修正</h3>
+  <p>理想公式假设各段等长、无冒险、无开销。实际中：时钟周期取最慢段 + 流水线寄存器延迟；分支会带来惩罚；Cache 缺失会让 IF/MEM 停顿；多发射会改变“每条指令占几拍”的定义。做题时先看题目是否声明“理想流水线”，没有声明就按给出的段数和停顿数算。</p>
+
+  <div class="callout views"><div class="co-title">🌐 多源视角</div>
+  <ul>
+    <li><b>【唐朔飞】</b>先讲指令周期，再讲数据通路，最后讲控制器；强调“取指阶段所有指令共用”。本站用法：画数据通路题先写取指，再写执行，不会乱。</li>
+    <li><b>【CSAPP】</b>用 Y86-64 循序渐进地搭 CPU：先单周期，再流水线，最后处理冒险。本站用法：把“控制信号—数据通路—流水线寄存器”看成一条链，别孤立背。</li>
+    <li><b>【Patterson & Hennessy】</b>用“流水线时空图 + 冒险”讲性能，强调 load-use 需要停顿。本站用法：看到 load 后紧跟使用，先想“能不能转发，需不需要停”。</li>
+  </ul>
+  <div class="src">参考：唐朔飞《计算机组成原理》第 8、9 章；CSAPP 第 4 章；Patterson & Hennessy 第 4 章。</div></div>
+
+  <h2 class="sec" id="pit">⚠️ 本章避坑清单</h2>
+  <div class="steps">
+    <div class="step">PC 存下一条指令地址；取指后加指令长度，不是固定加 1。</div>
+    <div class="step">间址周期取的是<b>有效地址</b>，不是操作数；执行周期才取操作数。</div>
+    <div class="step">硬布线速度快但难修改，微程序灵活但需要取微指令；不要反着说。</div>
+    <div class="step">水平型微指令并行强、字长长；垂直型字短、并行差。选择题常把优缺点对调。</div>
+    <div class="step">流水线总周期 = k + n − 1，不是 n × k；加速比上限是 k，不是无限。</div>
+    <div class="step">load-use 冒险即使有转发也可能要停 1 拍；不要看到“转发”就认为零停顿。</div>
+    <div class="step">结构冒险是资源冲突，数据冒险是数据依赖，控制冒险是分支改变 PC；三者不要混。</div>
+  </div>
+
+  <h2 class="sec" id="quiz">📝 章内练习（<span data-quiz-count>10</span> 题 · 基础 → 提高 → 真题改编）</h2>
+  <p class="muted">重点练：取指数据流、微程序、流水线周期与三类冒险。</p>
+  <div data-quiz-ch="5"></div>
+
+  <h2 class="sec" id="ck">✅ 本章打卡</h2>
+  <div data-ck-scope>
+    <p><span class="progress-pill">0 / 6 已打卡</span></p>
+    <div class="checklist">
+      <label class="check-item" data-ck="c5-1"><input type="checkbox"><span>能画出 CPU 内部寄存器连接图，说出 PC/IR/MAR/MDR 的作用</span></label>
+      <label class="check-item" data-ck="c5-2"><input type="checkbox"><span>能写出取指周期的完整数据流和 PC 更新规则</span></label>
+      <label class="check-item" data-ck="c5-3"><input type="checkbox"><span>能比较硬布线与微程序控制器，说出微指令两种格式</span></label>
+      <label class="check-item" data-ck="c5-4"><input type="checkbox"><span>能画五段流水线时空图，算总周期/吞吐率/加速比/效率</span></label>
+      <label class="check-item" data-ck="c5-5"><input type="checkbox"><span>能判断结构/数据/控制冒险，并各说出两种解决办法</span></label>
+      <label class="check-item" data-ck="c5-6"><input type="checkbox"><span>能沿单总线数据通路写出 ADD R1,R2 的微操作序列</span></label>
+    </div>
+  </div>
+</div>
+
+<footer>
+  408 计算机组成原理可视化课堂 · 基础教学 + 交互实验室 + 分级题库<br>
+  <div class="pagers"><a href="ch04.html">← 第 4 章 指令系统</a><a href="ch06.html">第 6 章 总线 →</a><a href="practice.html">去练习场 →</a></div>
+</footer>
+<script src="assets/questions.js?v=1"></script>
+<script src="assets/app.js?v=1"></script>
+<script src="assets/labs.js?v=1"></script>
+</body>
+</html>
