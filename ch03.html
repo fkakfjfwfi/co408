@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 3 章 存储系统 · 408 计算机组成原理可视化课堂</title>
+<meta name="description" content="408 计算机组成原理第 3 章：存储层次、SRAM/DRAM、主存扩展、低位交叉、Cache 映射与虚拟存储器，附 Cache 命中实验室。">
+<link rel="stylesheet" href="assets/style.css?v=1">
+</head>
+<body>
+<nav class="topbar"><div class="topbar-inner">
+  <a class="logo" href="index.html"><span class="dot"></span>408 计组可视化课堂</a>
+  <div class="nav-links">
+    <a href="index.html">总览</a><a href="ch01.html">系统概述</a><a href="ch02.html">数据表示</a><a href="ch03.html">存储系统</a><a href="ch04.html">指令系统</a><a href="ch05.html">CPU</a><a href="ch06.html">总线</a><a href="ch07.html">I/O</a><a href="practice.html">练习场</a><a href="method.html">备考方法论</a><a href="resources.html">资源导航</a>
+  </div>
+  <button class="theme-btn" title="切换明暗主题">🌙</button>
+</div></nav>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="kicker">CHAPTER 03 · 存储系统</span>
+    <h1>第 3 章 · 把“容量、速度、价格”三层叠起来</h1>
+    <p>存储系统是 408 计组最容易出大题的地方：<b>主存芯片扩展、低位交叉、Cache 地址划分、虚拟地址转换</b>，每一类都能单独成题。这一章不靠背，靠一套固定的“先画地址、再算位数”的手艺。</p>
+    <p class="tagline">预计 5~6 小时 · 1 个 Cache 实验室 · 12 道分级练习 · 大题高频</p>
+    <div class="stats">
+      <div class="stat"><b>3 层</b><span>Cache—主存—辅存</span></div>
+      <div class="stat"><b>3 种</b><span>直接/全相联/组相联</span></div>
+      <div class="stat"><b>2 个</b><span>地址翻译与缺页</span></div>
+    </div>
+  </div>
+
+  <div class="toc"><span class="toc-label">本页导航</span><a href="#goal">学习目标</a><a href="#s1">层次与局部性</a><a href="#s2">主存</a><a href="#s3">多模块</a><a href="#s4">Cache</a><a href="#lab">Cache 实验室</a><a href="#s5">虚拟存储</a><a href="#s6">外存</a><a href="#deep">进阶</a><a href="#pit">避坑</a><a href="#quiz">练习</a><a href="#ck">打卡</a></div>
+
+  <div class="callout exam" id="goal"><div class="co-title">🎯 学习目标（学完你应该能）</div>
+  ① 用局部性原理解释 Cache 为什么有效，算出平均访问时间；<br>
+  ② 区分 SRAM/DRAM/ROM，说出 DRAM 为什么需要刷新；<br>
+  ③ 用“位扩展、字扩展、字位同时扩展”算芯片数量和地址线；<br>
+  ④ 画出低位交叉的流水时序，算连续读 n 个字的时间；<br>
+  ⑤ 给定 Cache 容量、块大小、路数，正确划分 tag/index/offset；<br>
+  ⑥ 说清虚拟地址 → 物理地址的转换过程，以及 TLB、页表、缺页各自的作用。</div>
+
+  <h2 class="sec" id="s1">3.1 存储层次与局部性：为什么 Cache 有用</h2>
+  <div class="callout life"><div class="co-title">📚 生活类比</div>
+  你写作业时，<b>手边的笔</b>是寄存器，<b>书桌上的常用书</b>是 Cache，<b>书架</b>是主存，<b>图书馆</b>是辅存。每次拿书，先看桌上有没有；没有再去书架；再没有才去图书馆。桌子小但快，图书馆大但慢——这就是存储层次。</div>
+
+  <table class="tbl">
+    <tr><th>层次</th><th>典型介质</th><th>容量</th><th>速度</th><th>成本</th><th>管理者</th></tr>
+    <tr><td>寄存器</td><td>触发器</td><td>几十~几百字节</td><td>最快（&lt;1 ns）</td><td>最高</td><td>编译器/硬件</td></tr>
+    <tr><td>Cache（L1/L2/L3）</td><td>SRAM</td><td>KB~MB</td><td>几 ns</td><td>高</td><td>硬件</td></tr>
+    <tr><td>主存</td><td>DRAM</td><td>GB</td><td>几十~上百 ns</td><td>中</td><td>操作系统 + 硬件</td></tr>
+    <tr><td>辅存</td><td>SSD/磁盘</td><td>TB</td><td>μs~ms</td><td>低</td><td>操作系统</td></tr>
+  </table>
+
+  <p><b>局部性原理</b>是这套层次能工作的前提：</p>
+  <div class="grid cols-2">
+    <div class="card"><h3>时间局部性</h3><p>刚被访问过的数据，很可能马上再次被访问。例如循环变量 i、反复调用的函数、刚查过的页表项。</p></div>
+    <div class="card"><h3>空间局部性</h3><p>一个单元被访问后，它附近的单元很可能很快被访问。例如顺序遍历数组、指令顺序执行、结构体字段连续存放。</p></div>
+  </div>
+
+  <div class="formula">
+    平均访问时间 T<sub>avg</sub> = H × T<sub>c</sub> + (1 − H) × T<sub>m</sub><br>
+    （先查 Cache，缺失再访问主存时：T<sub>avg</sub> = T<sub>c</sub> + (1 − H) × T<sub>miss</sub>）<br>
+    加速比 = T<sub>m</sub> / T<sub>avg</sub>
+  </div>
+  <p>其中 H 是命中率，T<sub>c</sub> 是 Cache 访问时间，T<sub>m</sub> 是主存访问时间，T<sub>miss</sub> 是缺失代价。注意“先查 Cache”和“同时查 Cache 与主存”的公式不同，题目会明确。</p>
+
+  <h2 class="sec" id="s2">3.2 主存：SRAM、DRAM 与芯片扩展</h2>
+  <h3 class="sub">三种半导体存储器</h3>
+  <table class="tbl">
+    <tr><th>类型</th><th>存储原理</th><th>刷新</th><th>读出</th><th>速度</th><th>集成度</th><th>典型用途</th></tr>
+    <tr><td>SRAM</td><td>触发器（双稳态电路）</td><td>不需要</td><td>非破坏性</td><td>快</td><td>低</td><td>Cache</td></tr>
+    <tr><td>DRAM</td><td>电容存电荷</td><td>需要定时刷新</td><td>破坏性，需再生</td><td>较慢</td><td>高</td><td>主存</td></tr>
+    <tr><td>ROM</td><td>熔丝/浮栅等</td><td>不需要</td><td>非破坏性</td><td>较慢</td><td>高</td><td>BIOS、固件</td></tr>
+  </table>
+  <p><b>DRAM 刷新：</b>电容会漏电，必须周期性读出并重写。常见三种方式：</p>
+  <table class="tbl">
+    <tr><th>方式</th><th>做法</th><th>特点</th></tr>
+    <tr><td>集中刷新</td><td>在一段时间内集中刷新所有行</td><td>存在“死区”，刷新期间不能访问</td></tr>
+    <tr><td>分散刷新</td><td>每个存取周期都刷新一行</td><td>无死区，但存取周期变长</td></tr>
+    <tr><td>异步刷新</td><td>把刷新分散到最大刷新间隔内</td><td>折中，死区短</td></tr>
+  </table>
+  <p><b>地址复用：</b>DRAM 芯片引脚少，行地址和列地址分两次传送，用 RAS（行地址选通）和 CAS（列地址选通）区分。这也是 DRAM 地址线常为地址位数一半的原因。</p>
+
+  <h3 class="sub">芯片扩展：先位扩展，再字扩展</h3>
+  <p>存储芯片的规格常写成“字数 × 位数”，例如 1K×4 位。要组成更大的存储器，需要扩展：</p>
+  <table class="tbl">
+    <tr><th>扩展方式</th><th>目的</th><th>做法</th><th>地址线/数据线</th></tr>
+    <tr><td>位扩展</td><td>增加字长</td><td>多片并联，地址线共用，数据线分别接不同位</td><td>地址线不变，数据线变宽</td></tr>
+    <tr><td>字扩展</td><td>增加字数</td><td>多组串联，地址高位经译码器产生片选</td><td>数据线不变，地址线增加</td></tr>
+    <tr><td>字位同时扩展</td><td>两者都要</td><td>先位扩展成组，再字扩展成片</td><td>地址、数据都增加</td></tr>
+  </table>
+  <p><b>例：</b>用 1K×4 位芯片组成 4K×8 位存储器。位扩展需要 8/4=2 片并联成 1K×8；字扩展需要 4K/1K=4 组；共 2×4=8 片。地址线：1K 需要 10 位片内地址，4K 需要 12 位总地址，多出的 2 位送 2-4 译码器产生 4 个片选信号。</p>
+
+  <div class="callout exam"><div class="co-title">📌 408 计算套路</div>
+  ① 先算“总字数 × 总位数”；② 用总字数/芯片字数 = 字扩展倍数，总位数/芯片位数 = 位扩展倍数；③ 片数 = 两者乘积；④ 地址线位数 = log₂(总字数)，数据线位数 = 总位数；⑤ 片选译码器输入位数 = log₂(字扩展倍数)。按这五步写，基本不会乱。</div>
+
+  <h3 class="sub">存取时间与存取周期</h3>
+  <p><b>存取时间</b>是从发出地址到数据稳定所需的时间；<b>存取周期</b>是连续两次访问所需的最小间隔，通常大于存取时间（包含恢复时间）。DRAM 的存取周期明显长于存取时间，这是刷新和恢复造成的。</p>
+
+  <h2 class="sec" id="s3">3.3 多模块存储器：让主存“流水”起来</h2>
+  <p>单个存储模块一次只能服务一个访问，CPU 很快、主存很慢。多模块存储器用多个模块并行/流水工作来提高带宽。</p>
+  <table class="tbl">
+    <tr><th>方式</th><th>编址</th><th>工作方式</th><th>带宽</th><th>适用</th></tr>
+    <tr><td>单体多字</td><td>一个模块，一次读多个字</td><td>顺序读出连续多个字</td><td>提高突发传输效率</td><td>连续地址访问</td></tr>
+    <tr><td>高位交叉</td><td>高位地址选模块</td><td>一个模块存连续地址，顺序访问仍只用一个模块</td><td>基本不提高</td><td>扩大容量</td></tr>
+    <tr><td>低位交叉</td><td>低位地址选模块</td><td>连续地址分布在不同的模块，可流水访问</td><td>显著提高</td><td>提高带宽</td></tr>
+  </table>
+  <p><b>低位交叉的时序：</b>设 m 个模块，每个模块存取周期 T，总线传送周期 r。连续读 n 个字，第一个字需要 T，之后每隔 r 可以取得下一个字：</p>
+  <div class="formula">
+    t = T + (n − 1) × r &nbsp;&nbsp;（要求 m ≥ T / r，否则会冲突）<br>
+    带宽 = n / t
+  </div>
+  <p><b>例：</b>4 体低位交叉，T=200 ns，r=50 ns，连续读 4 个字：t = 200 + 3×50 = 350 ns；若每字 4 B，带宽 = 16 B / 350 ns ≈ 45.7 MB/s。若模块数少于 T/r，流水会断，公式要修正。</p>
+
+  <h2 class="sec" id="s4">3.4 Cache：把常用的块搬到手边</h2>
+  <p>Cache 与主存之间以<b>块（line/block）</b>为单位交换数据。主存块要被放到 Cache 的哪一行，由映射方式决定。</p>
+
+  <h3 class="sub">三种映射方式</h3>
+  <table class="tbl">
+    <tr><th>方式</th><th>规则</th><th>地址划分</th><th>优点</th><th>缺点</th></tr>
+    <tr><td>直接映射</td><td>主存块号 mod Cache 行数</td><td>tag + index + offset</td><td>硬件简单，只需比较 1 个 tag</td><td>冲突高，抖动</td></tr>
+    <tr><td>全相联</td><td>任意主存块可放任意行</td><td>tag + offset</td><td>命中率高，冲突少</td><td>需与所有行比较，成本高</td></tr>
+    <tr><td>组相联</td><td>组间直接，组内全相联</td><td>tag + index + offset</td><td>折中，最常用</td><td>硬件比直接映射复杂</td></tr>
+  </table>
+
+  <div class="formula">
+    Cache 行数 = Cache 容量 / 块大小<br>
+    直接映射：index 位数 = log₂(行数)<br>
+    组相联：组数 = 行数 / 路数，index 位数 = log₂(组数)<br>
+    offset 位数 = log₂(块大小)<br>
+    tag 位数 = 主存地址位数 − index 位数 − offset 位数
+  </div>
+
+  <p><b>例：</b>Cache 64 KB，块 32 B，主存地址 32 位。行数 = 2048 = 2¹¹，offset = 5 位。直接映射 index = 11 位，tag = 32−11−5 = 16 位；4 路组相联组数 = 512 = 2⁹，index = 9 位，tag = 18 位；全相联 tag = 27 位。</p>
+
+  <div class="lab" id="lab-cache">
+    <div class="lab-title">🔬 实验室 · Cache 映射与命中模拟</div>
+    <div class="lab-desc">固定 32 KB Cache、64 B 块、32 位地址。切换 1/2/4/8 路，输入地址看 tag/index/offset 如何变化；连续访问同一组的不同 tag，观察 LRU 替换。</div>
+    <div class="lab-stage">
+      <div class="lab-ctrl">
+        <label class="lab-field">相联度<select id="cache-way"><option value="1">直接映射（1 路）</option><option value="2">2 路组相联</option><option value="4" selected>4 路组相联</option><option value="8">8 路组相联</option></select></label>
+        <label class="lab-field">主存地址<input id="cache-addr" type="text" value="0x00001234"></label>
+        <button id="cache-go" type="button">访问</button>
+        <button id="cache-rand" class="ghost" type="button">随机地址</button>
+        <button id="cache-reset" class="ghost" type="button">清空 Cache</button>
+      </div>
+      <div class="lab-kv" id="cache-config" style="margin-bottom:8px"></div>
+      <div id="cache-out"></div>
+    </div>
+    <div class="lab-note" id="cache-note"></div>
+  </div>
+
+  <h3 class="sub">替换算法与写策略</h3>
+  <div class="grid cols-2">
+    <div class="card"><h3>替换算法</h3><p><b>随机、FIFO、LRU、LFU。</b>LRU（最近最少使用）命中率通常较高，但需要为每行维护使用计数；FIFO 简单，可能出现 Belady 异常（增加行数反而命中率下降）。</p></div>
+    <div class="card"><h3>写策略</h3><p><b>写直达</b>：每次写都更新 Cache 和主存，简单但写流量大；<b>写回</b>：只写 Cache，行被替换时才写回，需要脏位。写缺失时还有“写分配/非写分配”两种选择。</p></div>
+  </div>
+  <table class="tbl">
+    <tr><th>组合</th><th>典型搭配</th><th>原因</th></tr>
+    <tr><td>写回 + 写分配</td><td>常见于 L1/L2</td><td>利用空间局部性，减少主存写</td></tr>
+    <tr><td>写直达 + 非写分配</td><td>常见于简单系统</td><td>写直达已经更新主存，不必再调入块</td></tr>
+    <tr><td>写回 + 非写分配</td><td>较少见</td><td>写缺失不调块，直接写主存</td></tr>
+  </table>
+
+  <h3 class="sub">多级 Cache 与平均访问时间</h3>
+  <p>现代 CPU 通常有 L1（分 I/D）、L2、L3。L1 缺失时查 L2，L2 缺失再查主存。两级 Cache 的平均访问时间可写成：</p>
+  <div class="formula">T<sub>avg</sub> = T<sub>L1</sub> + m<sub>1</sub> × (T<sub>L2</sub> + m<sub>2</sub> × T<sub>mem</sub>)</div>
+  <p>其中 m₁、m₂ 分别是 L1、L2 的缺失率。注意“缺失率”与“命中率”互为 1 的补数，但多级 Cache 的全局缺失率不等于各级缺失率简单相加。</p>
+
+  <h2 class="sec" id="s5">3.5 虚拟存储器：让每个程序都以为自己有一大块内存</h2>
+  <p>虚拟存储器把<b>主存和辅存</b>统一成一个大的逻辑地址空间。程序使用虚拟地址，硬件/操作系统把它翻译成物理地址；当前用不到的页放在磁盘上，需要时再调入主存。</p>
+  <table class="tbl">
+    <tr><th>方式</th><th>划分</th><th>优点</th><th>缺点</th></tr>
+    <tr><td>页式</td><td>等长页</td><td>无外部碎片，管理简单</td><td>有页内碎片；程序逻辑与页不对应</td></tr>
+    <tr><td>段式</td><td>按逻辑段</td><td>便于共享和保护，符合程序结构</td><td>有外部碎片，地址计算复杂</td></tr>
+    <tr><td>段页式</td><td>先分段，段内分页</td><td>兼顾逻辑结构与内存管理</td><td>地址转换需查两次表</td></tr>
+  </table>
+
+  <h3 class="sub">页式虚拟地址转换</h3>
+  <div class="formula">
+    虚拟地址 = 虚页号 VPN + 页内偏移 offset<br>
+    物理地址 = 页框号 PFN + 页内偏移 offset<br>
+    页表项：有效位 + 脏位 + 访问位 + 保护位 + 页框号
+  </div>
+  <div class="steps">
+    <div class="step"><b>查 TLB：</b>用 VPN 查快表。命中则直接得到 PFN，省去访问主存页表。</div>
+    <div class="step"><b>查页表：</b>TLB 缺失时，按页表基址 + VPN 访问主存页表项，得到 PFN；同时把该项装入 TLB。</div>
+    <div class="step"><b>缺页判断：</b>若页表项有效位为 0，触发缺页异常，操作系统从辅存调页；若主存已满，按置换算法淘汰一页（脏页需写回）。</div>
+    <div class="step"><b>拼接物理地址：</b>PFN 与 offset 拼接，访问 Cache/主存。</div>
+  </div>
+  <div class="callout warn"><div class="co-title">⚠️ TLB 缺失 ≠ 缺页</div>
+  TLB 只是页表项的缓存。TLB 缺失只说明“快表没命中”，页仍可能在主存中，查页表即可；只有页表项有效位为 0 才是缺页。这是选择题的高频陷阱。</div>
+
+  <h3 class="sub">虚拟存储 vs Cache</h3>
+  <table class="tbl">
+    <tr><th>维度</th><th>Cache</th><th>虚拟存储器</th></tr>
+    <tr><td>交换单位</td><td>块（几十~几百字节）</td><td>页（几 KB）</td></tr>
+    <tr><td>缺失代价</td><td>几十~几百 ns</td><td>几 ms（磁盘 I/O）</td></tr>
+    <tr><td>管理者</td><td>硬件</td><td>操作系统 + 硬件（TLB/页表遍历）</td></tr>
+    <tr><td>目的</td><td>弥补 Cache 与主存速度差</td><td>扩大逻辑地址空间，实现内存保护与共享</td></tr>
+    <tr><td>写策略</td><td>写回/写直达</td><td>通常写回（脏位）</td></tr>
+  </table>
+
+  <h2 class="sec" id="s6">3.6 外存：磁盘与 SSD</h2>
+  <p><b>磁盘结构：</b>盘片上有同心圆磁道，磁道分成扇区；多个盘面的同一磁道组成柱面。容量公式：</p>
+  <div class="formula">容量 = 磁头数 × 柱面数 × 每道扇区数 × 扇区大小</div>
+  <p><b>存取时间</b>由三部分组成：</p>
+  <div class="formula">
+    存取时间 = 寻道时间 + 平均旋转延迟 + 传输时间<br>
+    平均旋转延迟 = 1 / (2 × 转速)，转速单位：转/秒
+  </div>
+  <p>例：7200 r/min = 120 r/s，平均旋转延迟 = 1/(2×120) s ≈ 4.17 ms。传输时间 = 数据量 / 数据传输率。</p>
+  <p><b>SSD：</b>基于闪存，没有寻道和旋转延迟，随机访问快、抗震、功耗低；但有擦写次数限制，需要磨损均衡、垃圾回收。RAID 0 条带化提高性能无冗余；RAID 1 镜像；RAID 5 分布式奇偶校验，兼顾容量与可靠性；RAID 10 先镜像再条带。</p>
+
+  <h2 class="sec" id="deep">🚀 进阶深挖（教材级）</h2>
+  <h3 class="sub">深挖 1 · 直接映射的“抖动”</h3>
+  <p>直接映射中，主存块只能进唯一一行。如果程序反复访问两个映射到同一行的块（例如数组跨度正好等于 Cache 容量），每次都会互相替换，命中率骤降，称为“抖动（thrashing）”。组相联通过“一组多行”缓解这个问题；全相联则完全不限制，但比较成本高。</p>
+
+  <h3 class="sub">深挖 2 · 写分配与非写分配</h3>
+  <p>写缺失时有两种选择：<b>写分配</b>先把块调入 Cache 再写（适合写回，利用后续写/读的局部性）；<b>非写分配</b>直接写主存，不调块（适合写直达，避免无谓的读）。考试常问“写回法通常搭配哪种”，答“写分配”。</p>
+
+  <h3 class="sub">深挖 3 · 虚拟地址到物理地址的完整路径</h3>
+  <p>CPU 发出虚拟地址 → TLB 查 VPN → 命中得 PFN；未命中查页表（可能多级）→ 得到 PFN 并填入 TLB → PFN + offset 得物理地址 → 查 Cache（物理索引/物理标签）→ 命中返回；未命中访问主存。若页表项无效 → 缺页异常 → OS 调页 → 重新执行指令。把这条路径画成流程图，大题就能按步拿分。</p>
+
+  <div class="callout views"><div class="co-title">🌐 多源视角</div>
+  <ul>
+    <li><b>【唐朔飞】</b>把 Cache 映射讲成“主存块号对 Cache 行号的函数”，直接映射是取模，组相联是先分组再取模。本站用法：先写“行数/组数”，再取 log₂，地址划分就不会错。</li>
+    <li><b>【CSAPP】</b>用“存储层次 + 局部性”统一 Cache 和虚拟存储，强调“命中时间 + 缺失率 × 缺失代价”。本站用法：平均访问时间题先判断是“先查 Cache”还是“并行查”，再套公式。</li>
+    <li><b>【操作系统】</b>虚拟存储的核心是“按需调页 + 页面置换”，TLB 只是加速器。本站用法：不要把 TLB 缺失和缺页混为一谈。</li>
+  </ul>
+  <div class="src">参考：唐朔飞《计算机组成原理》第 3、4 章；CSAPP 第 6、9 章；王道《计算机组成原理复习指导》第 3 章。</div></div>
+
+  <h2 class="sec" id="pit">⚠️ 本章避坑清单</h2>
+  <div class="steps">
+    <div class="step">Cache 行数 = 容量 / 块大小，不是容量 / 字大小；地址划分先算行数/组数，再取 log₂。</div>
+    <div class="step">直接映射的 index 是“行号”，组相联的 index 是“组号”；4 路组相联时组数 = 行数/4。</div>
+    <div class="step">tag 位数 = 主存地址位数 − index − offset，不要忘记 offset。</div>
+    <div class="step">低位交叉提高带宽，高位交叉主要扩大容量；不要把两者说反。</div>
+    <div class="step">低位交叉公式 t = T + (n−1)r 有前提 m ≥ T/r；模块数不够时会冲突。</div>
+    <div class="step">TLB 命中不需要查页表，但仍可能要访问 Cache/主存取数据；TLB 缺失不等于缺页。</div>
+    <div class="step">虚拟存储的交换单位是“页”，Cache 的交换单位是“块”；两者管理者不同（OS vs 硬件）。</div>
+  </div>
+
+  <h2 class="sec" id="quiz">📝 章内练习（<span data-quiz-count>12</span> 题 · 基础 → 提高 → 真题改编）</h2>
+  <p class="muted">重点练：地址划分、芯片数、低位交叉、平均访问时间、TLB/缺页。</p>
+  <div data-quiz-ch="3"></div>
+
+  <h2 class="sec" id="ck">✅ 本章打卡</h2>
+  <div data-ck-scope>
+    <p><span class="progress-pill">0 / 6 已打卡</span></p>
+    <div class="checklist">
+      <label class="check-item" data-ck="c3-1"><input type="checkbox"><span>能画出存储层次，并用时间/空间局部性解释 Cache 的作用</span></label>
+      <label class="check-item" data-ck="c3-2"><input type="checkbox"><span>能说出 SRAM/DRAM/ROM 的区别和 DRAM 的三种刷新方式</span></label>
+      <label class="check-item" data-ck="c3-3"><input type="checkbox"><span>能用“位扩展 + 字扩展”算芯片数量、地址线和片选</span></label>
+      <label class="check-item" data-ck="c3-4"><input type="checkbox"><span>能算低位交叉连续读 n 个字的时间，并说出成立条件</span></label>
+      <label class="check-item" data-ck="c3-5"><input type="checkbox"><span>给定 Cache 参数，能正确划分 tag/index/offset</span></label>
+      <label class="check-item" data-ck="c3-6"><input type="checkbox"><span>能完整说出虚拟地址 → TLB → 页表 → 物理地址的流程</span></label>
+    </div>
+  </div>
+</div>
+
+<footer>
+  408 计算机组成原理可视化课堂 · 基础教学 + 交互实验室 + 分级题库<br>
+  <div class="pagers"><a href="ch02.html">← 第 2 章 数据表示</a><a href="ch04.html">第 4 章 指令系统 →</a><a href="practice.html">去练习场 →</a></div>
+</footer>
+<script src="assets/questions.js?v=1"></script>
+<script src="assets/app.js?v=1"></script>
+<script src="assets/labs.js?v=1"></script>
+</body>
+</html>
