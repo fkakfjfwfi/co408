@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>备考方法论 · 408 计算机组成原理可视化课堂</title>
+<meta name="description" content="408 计算机组成原理备考方法论：45 分分值分布、三轮复习节奏、错题本三栏法、真题两遍法、大题采分点、精确记忆清单与五个弃疗点。">
+<link rel="stylesheet" href="assets/style.css?v=1">
+</head>
+<body>
+<nav class="topbar"><div class="topbar-inner">
+  <a class="logo" href="index.html"><span class="dot"></span>408 计组可视化课堂</a>
+  <div class="nav-links">
+    <a href="index.html">总览</a><a href="ch01.html">系统概述</a><a href="ch02.html">数据表示</a><a href="ch03.html">存储系统</a><a href="ch04.html">指令系统</a><a href="ch05.html">CPU</a><a href="ch06.html">总线</a><a href="ch07.html">I/O</a><a href="practice.html">练习场</a><a href="method.html">备考方法论</a><a href="resources.html">资源导航</a>
+  </div>
+  <button class="theme-btn" title="切换明暗主题">🌙</button>
+</div></nav>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="kicker">METHOD · 备考方法论</span>
+    <h1>🧭 计组怎么学：把 45 分拆成可执行的动作</h1>
+    <p>这一页不讲知识，只讲<b>怎么学、怎么练、怎么在考场上拿分</b>。所有建议都落到“今天能做什么”，不写“要努力”“要多做题”这类空话。先读一遍，然后立刻把第 2、4 节用在今天。</p>
+    <p class="tagline">分值地图 · 三轮节奏 · 错题本三栏法 · 真题两遍法 · 大题采分点 · 12 项自测</p>
+    <div class="stats">
+      <div class="stat"><b>45</b><span>计组总分</span></div>
+      <div class="stat"><b>22+23</b><span>选择 + 综合</span></div>
+      <div class="stat"><b>3</b><span>轮复习</span></div>
+      <div class="stat"><b>5</b><span>高频弃疗点</span></div>
+    </div>
+  </div>
+
+  <div class="toc"><span class="toc-label">本页导航</span><a href="#map">分值地图</a><a href="#plan">三轮节奏</a><a href="#priority">章节优先级</a><a href="#daily">每日执行</a><a href="#wrong">错题本</a><a href="#real">真题两遍</a><a href="#write">大题采分</a><a href="#mem">记忆清单</a><a href="#trap">弃疗点</a><a href="#exam">考场时间</a><a href="#self">自测</a></div>
+
+  <h2 class="sec" id="map">一、先看清：计组 45 分从哪里来</h2>
+  <p>408 总分 150，四科分值：数据结构 45、计算机组成原理 45、操作系统 35、计算机网络 25。计组通常的题型结构是：</p>
+  <table class="tbl">
+    <tr><th>题型</th><th>题量（近年常见）</th><th>分值</th><th>特点</th></tr>
+    <tr><td>单项选择题</td><td>约 11 题</td><td>22 分（2 分/题）</td><td>概念辨析 + 小计算；决定下限</td></tr>
+    <tr><td>综合应用题</td><td>约 2 题</td><td>约 23 分</td><td>Cache/主存、数据通路、流水线、中断/DMA；决定上限</td></tr>
+  </table>
+  <div class="callout exam">
+    <div class="co-title">📌 计组的命题性格</div>
+    <b>① 计算多：</b>地址位数、芯片数、CPI、带宽、流水线周期、磁盘时间，几乎每年都有。<br>
+    <b>② 图多：</b>Cache 地址划分、数据通路、流水线时空图、中断流程，必须会画。<br>
+    <b>③ 概念细：</b>“字长”“透明”“隐指令”“TLB 缺失 vs 缺页”，选择题专挑边界。<br>
+    <b>④ 前后关联：</b>存储系统会用到第 2 章的数据表示，CPU 会用到第 4 章的指令格式；不能孤岛式复习。
+  </div>
+
+  <h2 class="sec" id="plan">二、三轮复习：每轮只干一件事</h2>
+  <p>把备考切成三段，每段有明确的“唯一目标”。切分依据是<b>可交付的成果</b>，不是“感觉学完了”。</p>
+  <table class="tbl">
+    <tr><th>轮次</th><th>时长（可按你的考试倒推）</th><th>唯一目标</th><th>计组日均配额</th><th>交付物</th></tr>
+    <tr><td><b>一轮 · 建框架</b></td><td>约 8~10 周</td><td>教材/单科书过完一遍，每章做基础选择题</td><td>10~15 页 + 20 道选择题</td><td>每章一张 A4 框架图 + 基础错题</td></tr>
+    <tr><td><b>二轮 · 补漏洞</b></td><td>约 6~8 周</td><td><b>重做一轮错题</b> + 攻大题</td><td>不设页数，按错题量定</td><td>错题本第二遍 + 每类大题 5 道</td></tr>
+    <tr><td><b>三轮 · 上考场</b></td><td>约 4 周</td><td>整套计时 + 查记忆清单</td><td>一天一套（真题/模拟）</td><td>时间分配稳定 + 公式默写全对</td></tr>
+  </table>
+  <div class="callout warn">
+    <div class="co-title">⚠️ 二轮最容易崩：打开书像没学过</div>
+    这是正常现象，不是失败信号。二轮的重点<b>不是赶新进度</b>，而是把一轮错题重做一遍、把大题从“看懂”变成“写对”。把二轮当“重刷一轮”会浪费最宝贵的查漏窗口。
+  </div>
+  <div class="steps">
+    <div class="step"><b>一轮不跳章：</b>按 01→07 顺序推进。第 3 章存储和第 5 章 CPU 是大头，但不要在前面拖太久，先保证“每章都见过”。</div>
+    <div class="step"><b>课后题用铅笔或另写纸上：</b>为二轮原题重做留空白。直接在书上写答案，二轮只能“看着答案回忆”。</div>
+    <div class="step"><b>每章结束画一张 A4：</b>左边画结构/流程，右边写公式和易错点。画不出来 = 没学懂，回去补。</div>
+    <div class="step"><b>三轮模拟分数不作为目标：</b>它的用途是练“每种题型花多久”，把节奏调进考场耐受区。</div>
+  </div>
+
+  <h2 class="sec" id="priority">三、章节优先级：时间不够时先保谁</h2>
+  <table class="tbl">
+    <tr><th>优先级</th><th>章节</th><th>为什么</th><th>必须拿下的题型</th></tr>
+    <tr class="hot-row"><td>P0</td><td>第 3 章 存储系统</td><td>选择 + 大题双高频，Cache/虚存几乎每年出现</td><td>地址划分、芯片扩展、平均访问时间、TLB/缺页</td></tr>
+    <tr class="hot-row"><td>P0</td><td>第 5 章 CPU</td><td>数据通路/流水线是综合题常客</td><td>取指数据流、微操作序列、流水线时空图、三类冒险</td></tr>
+    <tr><td>P1</td><td>第 2 章 数据表示</td><td>补码/浮点是计算题基础，也支撑第 3、5 章</td><td>补码转换、溢出、IEEE 754、海明码</td></tr>
+    <tr><td>P1</td><td>第 4 章 指令系统</td><td>选择题稳定出题，寻址方式是送分点</td><td>EA 计算、访存次数、扩展操作码、RISC/CISC</td></tr>
+    <tr><td>P2</td><td>第 7 章 I/O</td><td>中断/DMA 选择题 + 偶尔大题</td><td>中断响应五步、屏蔽字、DMA 三种方式</td></tr>
+    <tr><td>P2</td><td>第 1 章 系统概述</td><td>概念 + 性能公式，性价比高</td><td>冯·诺依曼、层次、CPU 时间/MIPS</td></tr>
+    <tr><td>P3</td><td>第 6 章 总线</td><td>以选择为主，分值相对低</td><td>带宽计算、同步/异步、仲裁</td></tr>
+  </table>
+  <p class="muted">P0 不是“只看这两章”，而是“时间不够时，先保证这两章的大题能动手”。P3 也要过一遍，选择题的 2 分同样重要。</p>
+
+  <h2 class="sec" id="daily">四、每日执行清单：一天只做四件事</h2>
+  <div class="steps">
+    <div class="step"><b>① 10 分钟回看昨天：</b>不重读教材，只看昨天标记的错题和 A4 框架图。这是间隔重复的第一层。</div>
+    <div class="step"><b>② 配额内的新内容：</b>看讲解 → 立刻做 10~20 道对应选择题。不做题的“看”是假学。</div>
+    <div class="step"><b>③ 当日错题三栏入册：</b>当天完成，隔夜就忘。计算题额外写“公式 + 单位”。</div>
+    <div class="step"><b>④ 睡前 5 分钟口述：</b>合上书，用自己的话说出今天学的部件“是什么、为什么存在、怎么工作”。说不出来，就是明天的第一件事。</div>
+  </div>
+  <div class="callout ok">
+    <div class="co-title">✅ 本站配合用法</div>
+    第 ② 步用<a href="practice.html">练习场</a>按章节筛选；第 ③ 步的错题会自动进错题本，点“只看错题”即可重做；第 ④ 步可以拿每章开头的“生活类比”当提词器，能讲清类比和真实结构的对应关系，说明框架立住了。
+  </div>
+
+  <h2 class="sec" id="wrong">五、错题本三栏法（计组加强版）</h2>
+  <p>错题本不是“抄题”，是建立“错误 → 概念”的索引。每题至少三栏，计算题加第四栏：</p>
+  <table class="tbl">
+    <tr><th>第一栏</th><th>第二栏</th><th>第三栏</th><th>第四栏（计算题）</th></tr>
+    <tr><td>题干缩写：这题考什么</td><td>我的错因：概念错/公式错/单位错/看错题</td><td>对应概念：章节号 + 概念名 + 一句话定义</td><td>正确公式 + 代入 + 结果 + 单位</td></tr>
+  </table>
+  <div class="callout exam">
+    <div class="co-title">📌 第三栏和第四栏最关键</div>
+    只抄题和答案，记住的是“这道题”；抄了概念和公式，记住的是“这类题的判据”。考场上不会出原题，但会出<b>同一个概念换个数字</b>。错因要写具体：不是“粗心”，而是“把 index 位数算成了行数”“忘了 offset 占 5 位”“DDR 乘了两次 2”。
+  </div>
+  <p><b>错题本的使用节奏：</b>当天入册 → 第二天重做 → 一周后重做 → 考前只看错题本。连续两次做对才可以标记“过关”，不要一次做对就划掉。</p>
+
+  <h2 class="sec" id="real">六、真题两遍法：别把最贵的资源当模拟卷</h2>
+  <div class="steps">
+    <div class="step"><b>第一遍：按年份从早到晚，不限时精做。</b>目的不是测分，是理解考点分布。每做一道，在旁边标“考点名 + 章节号”；做完一轮，你会得到一张真实的考点热力图。</div>
+    <div class="step"><b>第二遍：整套计时。</b>目的才是练节奏。注意：多数真题在单科书里已经做过，分数没有参考价值，只看时间分配和步骤分。</div>
+    <div class="step"><b>留一套最近年份：</b>放到三轮最后做一次真正的全真计时（含涂卡、连续 3 小时），这是唯一一次“干净”的模拟。</div>
+  </div>
+  <div class="callout warn">
+    <div class="co-title">⚠️ 三种题必须进错题本</div>
+    <b>做错的</b>、<b>蒙对的</b>、<b>做对但说不清为什么的</b>。后两种最危险——它们伪装成“我会了”，考场上换个数字就崩。尤其是计算题，答案对但公式不熟，也要进错题本。
+  </div>
+
+  <h2 class="sec" id="write">七、大题书写：按采分点写，不按“我懂了多少”写</h2>
+  <p>计组综合题通常 10~12 分一道，采分点高度结构化。答题时按“<b>公式 → 代入 → 结果 → 单位/结论</b>”四行写，哪怕结果算错，步骤分也能拿到。</p>
+  <table class="tbl">
+    <tr><th>题型</th><th>常见采分点</th><th>最容易丢的分</th></tr>
+    <tr><td>主存扩展/芯片数</td><td>总容量、字扩展倍数、位扩展倍数、片数、地址线/片选</td><td>片数只算字扩展；地址线忘记减去片内地址</td></tr>
+    <tr><td>Cache 地址划分</td><td>行数/组数、offset 位数、index 位数、tag 位数、映射关系</td><td>把行数当 index 位数；忘记 offset；组相联忘记除以路数</td></tr>
+    <tr><td>平均访问时间</td><td>公式、命中率、缺失代价、结果、单位</td><td>把命中率乘到缺失代价；ns/μs 混用</td></tr>
+    <tr><td>数据通路/微操作</td><td>取指序列、执行序列、控制信号、PC 更新</td><td>漏 PC 更新；间址周期取错；控制信号与部件不匹配</td></tr>
+    <tr><td>流水线</td><td>时空图、总周期、吞吐率、加速比、效率、冒险判断</td><td>总周期写成 n×k；忘记停顿；加速比不写单位/公式</td></tr>
+    <tr><td>浮点数</td><td>符号、阶码（含偏置）、尾数、十六进制、舍入/溢出</td><td>阶码忘加 127；尾数忘记隐含 1；对阶方向反</td></tr>
+    <tr><td>中断/DMA</td><td>响应步骤、屏蔽字、DMA 三方式、与中断区别</td><td>把隐指令说成指令；DMA 说成“完全不用中断”</td></tr>
+  </table>
+  <div class="steps">
+    <div class="step"><b>先圈题干要求：</b>“写出计算过程”“画出示意图”“说明理由”分别对应不同采分点，没写过程最高只得结果分。</div>
+    <div class="step"><b>公式必须单独成行：</b>例如“Cache 行数 = 64 KB / 32 B = 2048 = 2¹¹”，不要只写“11 位”。</div>
+    <div class="step"><b>单位不能省：</b>ns、μs、MB/s、位、字节。单位错 often 直接判错。</div>
+    <div class="step"><b>画图题先画骨架再填数：</b>时空图先画坐标轴和指令行，再填段；数据通路先画部件和总线，再标控制信号。</div>
+    <div class="step"><b>不会的题写相关公式：</b>哪怕算不到底，公式和思路也可能拿 1~2 分；空着一定是 0 分。</div>
+  </div>
+
+  <h2 class="sec" id="mem">八、精确记忆清单（二轮逐项自查）</h2>
+  <p>以下内容必须能<b>独立默写/算出</b>，不能“大致记得”。二轮时逐项打钩，算不出的立刻回章补。</p>
+  <table class="tbl">
+    <tr><th>项目</th><th>自测标准</th><th>对应章节</th></tr>
+    <tr><td>CPU 时间与 MIPS</td><td>给定主频、CPI、指令数，30 秒内算出时间和 MIPS</td><td><a href="ch01.html#s4">第 1 章</a></td></tr>
+    <tr><td>补码范围与转换</td><td>写出任意 −128~127 整数的 8 位补码；说出 −128 为什么没有原码</td><td><a href="ch02.html#s2">第 2 章</a></td></tr>
+    <tr><td>溢出判断</td><td>用双符号位和进位异或两种方法判断同一道加法</td><td><a href="ch02.html#s3">第 2 章</a></td></tr>
+    <tr><td>IEEE 754</td><td>单精度 1+8+23、偏置 127；把 −12.375 转成 0xC1460000</td><td><a href="ch02.html#s4">第 2 章</a></td></tr>
+    <tr><td>海明码/CRC</td><td>n=8 时 k=4；G(x)=x³+x+1 时余数 3 位</td><td><a href="ch02.html#s6">第 2 章</a></td></tr>
+    <tr><td>芯片扩展</td><td>1K×4 → 4K×8 需要 8 片，地址线 12 位，片选 2 位</td><td><a href="ch03.html#s2">第 3 章</a></td></tr>
+    <tr><td>低位交叉</td><td>t = T + (n−1)r，且能说出 m ≥ T/r 的前提</td><td><a href="ch03.html#s3">第 3 章</a></td></tr>
+    <tr><td>Cache 地址划分</td><td>64 KB/32 B 直接映射：11 位 index、5 位 offset、16 位 tag</td><td><a href="ch03.html#s4">第 3 章</a></td></tr>
+    <tr><td>虚拟地址转换</td><td>画出 VPN→TLB→页表→PFN→物理地址的完整流程</td><td><a href="ch03.html#s5">第 3 章</a></td></tr>
+    <tr><td>寻址方式</td><td>默写 10 种 EA 公式和取操作数访存次数</td><td><a href="ch04.html#s3">第 4 章</a></td></tr>
+    <tr><td>流水线公式</td><td>T=(k+n−1)Δt、S=nk/T、E=n/T；会画时空图</td><td><a href="ch05.html#s5">第 5 章</a></td></tr>
+    <tr><td>中断/DMA</td><td>中断响应五步；DMA 三方式；说出 5 点区别</td><td><a href="ch07.html">第 7 章</a></td></tr>
+  </table>
+
+  <h2 class="sec" id="trap">九、五个最容易“弃疗”的知识点，怎么破</h2>
+
+  <h3 class="sub">弃疗点 1 · IEEE 754 浮点数</h3>
+  <p><b>为什么难：</b>符号、阶码、尾数、偏置、隐含 1、非规格化、舍入，概念叠在一起。<br>
+  <b>怎么破：</b>只练一条链路“十进制小数 → 二进制 → 规格化 → 加偏置 → 拼字段 → 十六进制”，用<a href="ch02.html#lab-f32">浮点实验室</a>反查每一步。先练 −12.375、0.1、1.0 三个数，再练反向解析。<br>
+  <b>最小动作：</b>今天手写 3 个数的完整转换，每个不超过 5 分钟。</p>
+
+  <h3 class="sub">弃疗点 2 · Cache 映射与地址划分</h3>
+  <p><b>为什么难：</b>直接/全相联/组相联三套规则，index 有时是行号有时是组号，tag 还要减 offset。<br>
+  <b>怎么破：</b>固定四步：① 行数 = 容量/块大小；② 组数 = 行数/路数；③ offset = log₂块大小，index = log₂(行数或组数)；④ tag = 地址位数 − index − offset。用<a href="ch03.html#lab">Cache 实验室</a>切换 1/2/4/8 路，观察位数变化。<br>
+  <b>最小动作：</b>把同一组参数（64 KB、32 B、32 位）在三种映射下各算一遍，写成一张表。</p>
+
+  <h3 class="sub">弃疗点 3 · 流水线时空图与冒险</h3>
+  <p><b>为什么难：</b>时空图要画对“第 i 条指令第 j 段在第几拍”，冒险又要判断能不能转发。<br>
+  <b>怎么破：</b>先记公式 T=(k+n−1)Δt，再画 5 条指令的图，确认第 1 条在 WB 时第 5 条在 IF。冒险只记三类 + 每个两类解决办法；load-use 单独记“转发也可能停 1 拍”。用<a href="ch05.html#lab">流水线实验室</a>勾选停顿看差异。<br>
+  <b>最小动作：</b>手画 k=5、n=6 的时空图，标出总周期和加速比。</p>
+
+  <h3 class="sub">弃疗点 4 · 微程序与微指令</h3>
+  <p><b>为什么难：</b>微命令、微操作、微指令、微程序、微地址，五个“微”绕晕。<br>
+  <b>怎么破：</b>用“公司管理”类比：微命令 = 具体指令（开灯），微操作 = 动作（灯亮），微指令 = 一张工单（同时开灯+开空调），微程序 = 完成一个项目的工单序列，微地址 = 下一张工单的编号。只背“水平型并行强、垂直型字短”这对反义。<br>
+  <b>最小动作：</b>用一句话解释“为什么微程序控制器比硬布线慢”，写在错题本上。</p>
+
+  <h3 class="sub">弃疗点 5 · 中断与 DMA</h3>
+  <p><b>为什么难：</b>流程步骤多，隐指令、向量、屏蔽字、周期挪用、总线请求混在一起。<br>
+  <b>怎么破：</b>画两条时间线：中断是“设备→CPU→服务程序”，DMA 是“设备→DMA→主存”，CPU 只在首尾出现。流程用<a href="ch07.html#lab-io">中断/DMA 演示</a>一步步点，嘴里跟着念。<br>
+  <b>最小动作：</b>合上书，用 5 句话复述中断响应；用 3 句话复述 DMA 传输。</p>
+
+  <h2 class="sec" id="exam">十、考场时间分配（180 分钟）</h2>
+  <table class="tbl">
+    <tr><th>阶段</th><th>建议时间</th><th>策略</th></tr>
+    <tr><td>选择题 40 题</td><td>60~70 分钟</td><td>先做有把握的，计算量大的标记跳过；每题超过 2 分钟先放</td></tr>
+    <tr><td>综合题 7 题</td><td>100~110 分钟</td><td>按“会的先做”排序；计组大题留 20~25 分钟/题</td></tr>
+    <tr><td>检查</td><td>10 分钟</td><td>优先检查单位、符号位、地址位数、答题卡</td></tr>
+  </table>
+  <div class="callout warn">
+    <div class="co-title">⚠️ 不要在一道 Cache 题上死磕</div>
+    如果地址划分卡住，先写公式和已知量，拿步骤分，跳去做数据通路/中断。最后回来补。408 是四科合卷，时间被任何一科拖垮都会影响全局。
+  </div>
+
+  <h2 class="sec" id="self">十一、12 项自测清单（二轮/三轮用）</h2>
+  <p>能独立完成打钩；不能的回到对应章节。进度保存在本机浏览器。</p>
+  <div data-ck-scope>
+    <p><span class="progress-pill">0 / 12 已打卡</span></p>
+    <div class="checklist">
+      <label class="check-item" data-ck="m1"><input type="checkbox"><span>能默写 CPU 时间、MIPS、平均 CPI 三个公式并各做一题</span></label>
+      <label class="check-item" data-ck="m2"><input type="checkbox"><span>能写出 −45 的四种机器码，并解释补码的模运算本质</span></label>
+      <label class="check-item" data-ck="m3"><input type="checkbox"><span>能用双符号位判断溢出，并说出 01/10 的含义</span></label>
+      <label class="check-item" data-ck="m4"><input type="checkbox"><span>能把 −12.375 转成 IEEE 754 单精度，并反向解析</span></label>
+      <label class="check-item" data-ck="m5"><input type="checkbox"><span>能算海明码校验位数，并说出校验位放在哪些位置</span></label>
+      <label class="check-item" data-ck="m6"><input type="checkbox"><span>能用 1K×4 芯片设计 4K×8 存储器，画出片选逻辑</span></label>
+      <label class="check-item" data-ck="m7"><input type="checkbox"><span>能算低位交叉读 n 个字的时间，并说出成立条件</span></label>
+      <label class="check-item" data-ck="m8"><input type="checkbox"><span>能对直接/组相联/全相联各做一次地址划分</span></label>
+      <label class="check-item" data-ck="m9"><input type="checkbox"><span>能画出虚拟地址→TLB→页表→物理地址的流程图</span></label>
+      <label class="check-item" data-ck="m10"><input type="checkbox"><span>能默写十种寻址方式的 EA 与访存次数</span></label>
+      <label class="check-item" data-ck="m11"><input type="checkbox"><span>能画五段流水线时空图，算总周期/加速比/效率</span></label>
+      <label class="check-item" data-ck="m12"><input type="checkbox"><span>能完整复述中断响应五步和 DMA 三种传送方式</span></label>
+    </div>
+  </div>
+
+  <div class="callout ok" style="margin-top:24px">
+    <div class="co-title">✅ 最后一句</div>
+    计组不是“背出来的”，是“<b>画出来 + 算出来</b>”的。看懂不算会，能在白纸上画出地址划分、时空图、中断流程，才算会。把这张自测清单当成二轮的验收标准，比刷多少题都管用。
+  </div>
+</div>
+
+<footer>
+  408 计算机组成原理可视化课堂 · 备考方法论<br>
+  <div class="pagers"><a href="index.html">← 返回总览</a><a href="practice.html">去练习场 →</a><a href="resources.html">资源导航 →</a></div>
+</footer>
+<script src="assets/app.js?v=1"></script>
+</body>
+</html>
