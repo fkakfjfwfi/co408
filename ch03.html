@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>第 3 章 存储系统 · 408 计算机组成原理可视化课堂</title>
 <meta name="description" content="408 计算机组成原理第 3 章：存储层次、SRAM/DRAM、主存扩展、低位交叉、Cache 映射与虚拟存储器，附 Cache 命中实验室。">
-<link rel="stylesheet" href="assets/style.css?v=1">
+<link rel="stylesheet" href="assets/style.css?v=2">
 </head>
 <body>
 <nav class="topbar"><div class="topbar-inner">
@@ -51,6 +51,10 @@
     <tr><td>辅存</td><td>SSD/磁盘</td><td>TB</td><td>μs~ms</td><td>低</td><td>操作系统</td></tr>
   </table>
 
+  <figure class="vis" data-vis="memory-hierarchy">
+    <figcaption>图 3-1 · 存储层次像金字塔：越靠上越快越小越贵，越靠下越大越慢越便宜</figcaption>
+  </figure>
+
   <p><b>局部性原理</b>是这套层次能工作的前提：</p>
   <div class="grid cols-2">
     <div class="card"><h3>时间局部性</h3><p>刚被访问过的数据，很可能马上再次被访问。例如循环变量 i、反复调用的函数、刚查过的页表项。</p></div>
@@ -91,6 +95,10 @@
   </table>
   <p><b>例：</b>用 1K×4 位芯片组成 4K×8 位存储器。位扩展需要 8/4=2 片并联成 1K×8；字扩展需要 4K/1K=4 组；共 2×4=8 片。地址线：1K 需要 10 位片内地址，4K 需要 12 位总地址，多出的 2 位送 2-4 译码器产生 4 个片选信号。</p>
 
+  <figure class="vis" data-vis="chip-expansion">
+    <figcaption>图 3-2 · 芯片扩展：每 2 片并联凑齐 8 位，4 组再由 2-4 译码器选片，共 8 片</figcaption>
+  </figure>
+
   <div class="callout exam"><div class="co-title">📌 408 计算套路</div>
   ① 先算“总字数 × 总位数”；② 用总字数/芯片字数 = 字扩展倍数，总位数/芯片位数 = 位扩展倍数；③ 片数 = 两者乘积；④ 地址线位数 = log₂(总字数)，数据线位数 = 总位数；⑤ 片选译码器输入位数 = log₂(字扩展倍数)。按这五步写，基本不会乱。</div>
 
@@ -112,6 +120,10 @@
   </div>
   <p><b>例：</b>4 体低位交叉，T=200 ns，r=50 ns，连续读 4 个字：t = 200 + 3×50 = 350 ns；若每字 4 B，带宽 = 16 B / 350 ns ≈ 45.7 MB/s。若模块数少于 T/r，流水会断，公式要修正。</p>
 
+  <figure class="vis" data-vis="low-order-interleave">
+    <figcaption>图 3-3 · 低位交叉时序：4 个模块像 4 条流水线，第一个字等 T，之后每隔 r 出一个字</figcaption>
+  </figure>
+
   <h2 class="sec" id="s4">3.4 Cache：把常用的块搬到手边</h2>
   <p>Cache 与主存之间以<b>块（line/block）</b>为单位交换数据。主存块要被放到 Cache 的哪一行，由映射方式决定。</p>
 
@@ -123,6 +135,10 @@
     <tr><td>组相联</td><td>组间直接，组内全相联</td><td>tag + index + offset</td><td>折中，最常用</td><td>硬件比直接映射复杂</td></tr>
   </table>
 
+  <figure class="vis" data-vis="cache-direct-map">
+    <figcaption>图 3-5 · 直接映射的冲突：主存块号对 Cache 行数取模，块 0 和块 4 会抢同一行</figcaption>
+  </figure>
+
   <div class="formula">
     Cache 行数 = Cache 容量 / 块大小<br>
     直接映射：index 位数 = log₂(行数)<br>
@@ -132,6 +148,10 @@
   </div>
 
   <p><b>例：</b>Cache 64 KB，块 32 B，主存地址 32 位。行数 = 2048 = 2¹¹，offset = 5 位。直接映射 index = 11 位，tag = 32−11−5 = 16 位；4 路组相联组数 = 512 = 2⁹，index = 9 位，tag = 18 位；全相联 tag = 27 位。</p>
+
+  <figure class="vis" data-vis="cache-address">
+    <figcaption>图 3-4 · 同一 32 位地址，在三种映射下切法不同：路数越多，index 越短、tag 越长</figcaption>
+  </figure>
 
   <div class="lab" id="lab-cache">
     <div class="lab-title">🔬 实验室 · Cache 映射与命中模拟</div>
@@ -188,6 +208,11 @@
     <div class="step"><b>缺页判断：</b>若页表项有效位为 0，触发缺页异常，操作系统从辅存调页；若主存已满，按置换算法淘汰一页（脏页需写回）。</div>
     <div class="step"><b>拼接物理地址：</b>PFN 与 offset 拼接，访问 Cache/主存。</div>
   </div>
+
+  <figure class="vis" data-vis="virtual-memory">
+    <figcaption>图 3-6 · 虚拟地址转换：先查 TLB，未命中查页表；页表项无效才是缺页，去磁盘调页</figcaption>
+  </figure>
+
   <div class="callout warn"><div class="co-title">⚠️ TLB 缺失 ≠ 缺页</div>
   TLB 只是页表项的缓存。TLB 缺失只说明“快表没命中”，页仍可能在主存中，查页表即可；只有页表项有效位为 0 才是缺页。这是选择题的高频陷阱。</div>
 
@@ -265,6 +290,7 @@
 </footer>
 <script src="assets/questions.js?v=1"></script>
 <script src="assets/app.js?v=1"></script>
+<script src="assets/visuals.js?v=1"></script>
 <script src="assets/labs.js?v=1"></script>
 </body>
 </html>
