@@ -560,4 +560,89 @@
     });
     render();
   })();
+
+  /* ══════════ 9. 单总线数据通路步进 ══════════ */
+  (function initDatapath() {
+    var box = $("lab-datapath");
+    if (!box) return;
+    var stage = $("dp-stage"), note = $("dp-note");
+    var prevBtn = $("dp-prev"), nextBtn = $("dp-next"), autoBtn = $("dp-auto"), resetBtn = $("dp-reset");
+    var steps = [
+      { a: ["pc", "mar"], d: "① PC → MAR：把下一条指令地址送上总线，存入 MAR。" },
+      { a: ["mem", "mdr"], d: "② 主存按 MAR 读出指令，送入 MDR。" },
+      { a: ["mdr", "ir"], d: "③ MDR → IR：指令进入指令寄存器，准备译码。" },
+      { a: ["pc"], d: "④ PC 更新：指向下一条指令（示例简化为 +1）。" },
+      { a: ["r1", "a"], d: "⑤ R1 → A：第一个操作数送到 ALU 的 A 端。" },
+      { a: ["r2", "b"], d: "⑥ R2 → B：第二个操作数送到 ALU 的 B 端。" },
+      { a: ["alu", "r1"], d: "⑦ ALU 完成加法，结果沿总线写回 R1。" }
+    ];
+    var idx = -1, timer = null;
+
+    function dpBox(id, x, y, w, h, title, sub) {
+      var s = '<g id="dp-' + id + '" class="dp-box">';
+      s += '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="8"/>';
+      s += '<text x="' + (x + w / 2) + '" y="' + (y + (sub ? h / 2 - 2 : h / 2 + 5)) + '" class="dp-title">' + title + '</text>';
+      if (sub) s += '<text x="' + (x + w / 2) + '" y="' + (y + h / 2 + 16) + '" class="dp-sub">' + sub + '</text>';
+      return s + '</g>';
+    }
+    function conn(x1, y1, x2, y2) {
+      return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" class="dp-conn"/>';
+    }
+    var s = '';
+    s += '<line id="dp-bus" x1="30" y1="180" x2="870" y2="180" class="dp-bus"/>';
+    s += '<text x="450" y="202" class="dp-buslabel">内部总线：同一时刻只允许一个部件驱动</text>';
+    s += dpBox("pc", 50, 40, 110, 52, "PC", "下一条地址");
+    s += dpBox("mar", 200, 40, 110, 52, "MAR", "地址寄存器");
+    s += dpBox("mdr", 350, 40, 110, 52, "MDR", "数据寄存器");
+    s += dpBox("ir", 500, 40, 110, 52, "IR", "当前指令");
+    s += dpBox("r1", 650, 40, 100, 52, "R1", "操作数 1");
+    s += dpBox("r2", 770, 40, 100, 52, "R2", "操作数 2");
+    s += dpBox("alu", 300, 260, 120, 55, "ALU", "加法器");
+    s += dpBox("a", 450, 260, 80, 48, "A", "ALU 输入");
+    s += dpBox("b", 550, 260, 80, 48, "B", "ALU 输入");
+    s += dpBox("mem", 660, 260, 180, 55, "主存", "按地址读写");
+    [105, 255, 405, 555, 700, 820].forEach(function (x) { s += conn(x, 92, x, 180); });
+    [360, 490, 590, 750].forEach(function (x) { s += conn(x, 260, x, 180); });
+    stage.innerHTML = '<svg viewBox="0 0 900 350" role="img" aria-label="单总线数据通路">' + s + '</svg>';
+
+    function render() {
+      var boxes = stage.querySelectorAll(".dp-box");
+      boxes.forEach(function (g) { g.classList.remove("dp-active"); });
+      if (idx >= 0) {
+        steps[idx].a.forEach(function (id) {
+          var g = stage.querySelector("#dp-" + id);
+          if (g) g.classList.add("dp-active");
+        });
+        note.textContent = steps[idx].d;
+        note.className = "lab-note good";
+      } else {
+        note.textContent = "点“下一步”开始：观察每一步是哪两个部件在使用总线。";
+        note.className = "lab-note";
+      }
+      var bus = stage.querySelector("#dp-bus");
+      if (bus) bus.classList.toggle("dp-bus-hot", idx >= 0);
+    }
+    function stop() { if (timer) { clearInterval(timer); timer = null; autoBtn.textContent = "自动播放"; } }
+    nextBtn.addEventListener("click", function () {
+      stop();
+      if (idx < steps.length - 1) idx++;
+      render();
+    });
+    prevBtn.addEventListener("click", function () {
+      stop();
+      if (idx > -1) idx--;
+      render();
+    });
+    resetBtn.addEventListener("click", function () { stop(); idx = -1; render(); });
+    autoBtn.addEventListener("click", function () {
+      if (timer) { stop(); return; }
+      autoBtn.textContent = "暂停";
+      timer = setInterval(function () {
+        if (idx >= steps.length - 1) { stop(); return; }
+        idx++;
+        render();
+      }, 1700);
+    });
+    render();
+  })();
 })();
