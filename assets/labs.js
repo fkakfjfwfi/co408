@@ -64,7 +64,7 @@
     }
     box.querySelector("#perf-go").addEventListener("click", calc);
     box.querySelector("#perf-reset").addEventListener("click", function () {
-      freq.value = "2.0"; cpi.value = "4"; inst.value = "1000"; calc();
+      freq.value = "2.0"; cpi.value = "4"; inst.value = "100"; calc();
     });
     calc();
   })();
